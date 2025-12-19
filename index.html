@@ -3,105 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Вход только 18+</title>
+    <title>Dating Quiz 18+</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        /* Основной сброс и шрифты */
+        /* --- CORE STYLES --- */
         body {
             font-family: 'Montserrat', sans-serif;
             background-color: #000;
-            /* ВАЖНО: Используем dvh для мобильных браузеров */
-            min-height: 100dvh;
-            height: 100dvh; 
-        }
-        
-        /* Анимации */
-        .fade-in-up {
-            animation: fadeInUp 0.8s ease-out forwards;
-            opacity: 0;
-            transform: translateY(20px);
+            position: fixed; /* Фиксируем body, скролл внутри wrapper */
+            inset: 0;
+            width: 100%;
+            height: 100%;
         }
 
-        @keyframes fadeInUp {
+        /* Убираем синюю подсветку при тапе */
+        * { -webkit-tap-highlight-color: transparent; }
+
+        /* --- ANIMATIONS --- */
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .pulse-btn {
-            animation: pulse-red 2s infinite;
-        }
-
+        .pulse-btn { animation: pulse-red 2s infinite; }
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
             70% { box-shadow: 0 0 0 15px rgba(220, 38, 38, 0); }
             100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
         }
-        
-        .group:hover ~ .bg-overlay {
-             opacity: 0.2; 
+
+        .pulse-green { animation: pulse-green-anim 2s infinite; }
+        @keyframes pulse-green-anim {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
         }
 
+        /* --- GLASSMOPRHISM --- */
         .glass-panel {
-            background: rgba(0, 0, 0, 0.4); 
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); 
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8); 
         }
 
-        /* Языки и страны */
+        /* --- UI ELEMENTS --- */
         .lang-link {
             position: relative;
-            opacity: 0.6;
-            transition: all 0.3s;
-            display: inline-block;
+            opacity: 0.7;
+            transition: all 0.2s;
             cursor: pointer;
+            padding: 4px;
         }
         .lang-link:hover, .lang-link.active-country {
             opacity: 1;
             color: #ef4444;
-            transform: translateY(-2px);
             font-weight: 800;
         }
-
         .lang-switch-btn {
             cursor: pointer;
-            transition: all 0.3s ease;
-            opacity: 0.5;
+            transition: all 0.2s ease;
+            opacity: 0.6;
             font-weight: 600;
+            padding: 4px;
         }
-        .lang-switch-btn.active {
-            opacity: 1;
-            color: #ef4444;
-            text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-        }
-        .lang-switch-btn:hover {
-            opacity: 0.8;
-        }
+        .lang-switch-btn.active { opacity: 1; color: #ef4444; }
 
-        /* Анимация текста */
-        .text-vaporize {
+        /* --- QUIZ SPECIFIC --- */
+        .progress-bar-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #ef4444, #f97316);
+            transition: width 0.5s ease;
+        }
+        
+        /* Loading Animation items */
+        .processing-item {
             opacity: 0;
-            filter: blur(10px);
-            transform: scale(0.95);
+            transform: translateX(-20px);
+            transition: all 0.3s;
         }
-        .translatable {
-            transition: opacity 0.5s ease, filter 0.5s ease, transform 0.5s ease;
-            will-change: opacity, filter, transform;
-        }
+        .processing-item.active { opacity: 1; transform: translateX(0); }
+        .processing-item.done { opacity: 0.5; color: #22c55e; }
 
-        /* Видео фон */
-        #bg-video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 0;
-        }
-
-        /* Чат */
+        /* --- CHAT CSS --- */
         .chat-scroll-container {
             mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
@@ -111,45 +102,25 @@
             flex-direction: column;
             justify-content: flex-end;
         }
-        
-        .chat-track {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            gap: 8px;
-            padding-bottom: 8px;
+        .chat-message-new {
+            animation: messageSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
-
         @keyframes messageSlideIn {
             from { opacity: 0; transform: translateY(30px) scale(0.95); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
-
-        .chat-message-new {
-            animation: messageSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        .chat-message {
-            transition: background-color 0.2s;
-        }
-        .chat-message:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-        
         .online-dot {
             box-shadow: 0 0 5px #22c55e;
-            animation: pulse-green 2s infinite;
+            animation: pulse-green-dot 2s infinite;
         }
-        @keyframes pulse-green {
+        @keyframes pulse-green-dot {
             0% { opacity: 1; }
             50% { opacity: 0.5; }
             100% { opacity: 1; }
         }
-
-        /* Тост */
         .chat-toast {
             position: absolute;
-            bottom: 50px;
+            bottom: 60px;
             left: 50%;
             transform: translateX(-50%) translateY(10px);
             background-color: rgba(220, 38, 38, 0.95);
@@ -158,499 +129,485 @@
             border-radius: 8px;
             font-size: 10px;
             font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             pointer-events: none;
             opacity: 0;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            z-index: 50;
+            transition: all 0.3s;
+            z-index: 100;
             width: 90%;
             text-align: center;
-            border: 1px solid rgba(255,255,255,0.2);
         }
-        .chat-toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-        .chat-toast::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 5px 5px 0;
-            border-style: solid;
-            border-color: rgba(220, 38, 38, 0.95) transparent transparent transparent;
-        }
+        .chat-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
-<body class="w-full text-white relative overflow-hidden">
+<body>
 
-    <!-- ВИДЕО ФОН (Fixed, чтобы не уезжал при скролле на iPhone) -->
-    <div class="fixed inset-0 overflow-hidden z-0 bg-black">
-        <video id="bg-video" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964">
+    <!-- VIDEO BACKGROUND (Layer 0) -->
+    <div class="fixed inset-0 overflow-hidden z-0 bg-black pointer-events-none">
+        <video id="bg-video" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964" class="w-full h-full object-cover">
             <source src="background.mp4" type="video/mp4">
-            Ваш браузер не поддерживает видео тег.
         </video>
-        <!-- Темный оверлей -->
-        <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/20 z-10 transition-opacity duration-700"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-black/40 z-10"></div>
     </div>
 
-    <!-- ВЕРХНЯЯ ПАНЕЛЬ ЯЗЫКОВ -->
-    <div class="absolute top-0 left-0 w-full z-50 p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 fade-in-up pointer-events-none">
-        <!-- RU / EN -->
-        <div class="flex gap-3 text-sm font-bold tracking-widest pointer-events-auto bg-black/30 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none px-3 py-1 rounded-full md:p-0">
+    <!-- HEADER (Layer 50) -->
+    <div class="absolute top-0 left-0 w-full z-50 p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pointer-events-none">
+        <!-- RU/EN -->
+        <div class="flex gap-3 text-sm font-bold tracking-widest pointer-events-auto bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-lg">
             <span onclick="setLang('ru')" id="lang-ru" class="lang-switch-btn active">RU</span>
             <span class="text-gray-500">|</span>
             <span onclick="setLang('en')" id="lang-en" class="lang-switch-btn">EN</span>
         </div>
-        <!-- Страны -->
-        <div class="flex flex-wrap justify-end gap-x-4 gap-y-2 max-w-[280px] md:max-w-[400px] text-xs font-bold tracking-widest pointer-events-auto bg-black/20 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none p-2 rounded-xl md:p-0" style="animation-delay: 0.2s;">
-            <span onclick="setLang('de')" class="lang-link text-white hover:text-red-500">AT</span>
-            <span onclick="setLang('fr')" class="lang-link text-white hover:text-red-500">BE</span>
-            <span onclick="setLang('fr')" class="lang-link text-white hover:text-red-500">FR</span>
-            <span onclick="setLang('de')" class="lang-link text-white hover:text-red-500">DE</span>
-            <span onclick="setLang('it')" class="lang-link text-white hover:text-red-500">IT</span>
-            <span onclick="setLang('nl')" class="lang-link text-white hover:text-red-500">NL</span>
-            <span onclick="setLang('pl')" class="lang-link text-white hover:text-red-500">PL</span>
-            <span onclick="setLang('es')" class="lang-link text-white hover:text-red-500">ES</span>
-            <span onclick="setLang('sv')" class="lang-link text-white hover:text-red-500">SE</span>
-            <span onclick="setLang('de')" class="lang-link text-white hover:text-red-500">CH</span>
+        <!-- Countries -->
+        <div class="flex flex-wrap justify-end gap-x-4 gap-y-2 max-w-[280px] md:max-w-[400px] text-xs font-bold tracking-widest pointer-events-auto bg-black/30 backdrop-blur-md p-3 rounded-xl border border-white/5">
+            <span onclick="setLang('de')" class="lang-link">AT</span>
+            <span onclick="setLang('fr')" class="lang-link">BE</span>
+            <span onclick="setLang('fr')" class="lang-link">FR</span>
+            <span onclick="setLang('de')" class="lang-link">DE</span>
+            <span onclick="setLang('it')" class="lang-link">IT</span>
+            <span onclick="setLang('nl')" class="lang-link">NL</span>
+            <span onclick="setLang('pl')" class="lang-link">PL</span>
+            <span onclick="setLang('es')" class="lang-link">ES</span>
+            <span onclick="setLang('sv')" class="lang-link">SE</span>
+            <span onclick="setLang('de')" class="lang-link">CH</span>
         </div>
     </div>
 
-    <!-- ГЛАВНЫЙ КОНТЕЙНЕР -->
-    <!-- 
-        ИЗМЕНЕНИЯ ДЛЯ МОБИЛЬНЫХ:
-        h-[100dvh] - используем динамическую высоту.
-        justify-end - прижимаем к низу.
-        pb-28 (было pb-10) - ОГРОМНЫЙ отступ снизу (~112px), чтобы поднять контент над панелью браузера.
-        overflow-y-auto - разрешаем скролл если экран супер-маленький.
-    -->
-    <div id="main-container" class="relative z-10 flex flex-col md:flex-row items-center justify-end md:justify-center h-[100dvh] w-full px-4 md:px-20 pb-28 md:pb-0 pt-20 md:pt-0 gap-6 md:gap-12 overflow-y-auto md:overflow-hidden">
+    <!-- MAIN SCROLL WRAPPER (Layer 40) - ГАРАНТИЯ РАБОТЫ НА МОБИЛЬНЫХ -->
+    <div class="absolute inset-0 z-40 overflow-y-auto overflow-x-hidden touch-pan-y">
         
-        <!-- ЛЕВАЯ КОЛОНКА: AGE GATE -->
-        <div id="age-gate" class="glass-panel w-full max-w-sm p-6 md:p-8 rounded-2xl text-center border-l-4 border-l-red-600 fade-in-up z-20 order-2 md:order-1 flex-shrink-0 mb-4 md:mb-0">
+        <!-- FLEX CONTAINER -->
+        <!-- pt-32 pb-32: большие отступы, чтобы контент не перекрывался браузером -->
+        <div class="min-h-full flex flex-col md:flex-row items-center justify-center pt-32 pb-32 px-4 gap-8 md:gap-16">
             
-            <div class="mb-4 flex justify-center">
-                <div class="w-14 h-14 rounded-full bg-red-600/20 flex items-center justify-center border border-red-500/50 shadow-[0_0_20px_rgba(220,38,38,0.4)]">
-                    <span class="text-lg font-black text-white tracking-tighter">18+</span>
+            <!-- LEFT COLUMN: DYNAMIC VIEWS -->
+            <div id="content-area" class="w-full max-w-sm md:max-w-md flex-shrink-0 relative">
+                
+                <!-- 1. AGE GATE -->
+                <div id="view-age-gate" class="glass-panel p-6 md:p-8 rounded-2xl text-center border-t-4 border-red-600 fade-in">
+                    <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-red-600/20 flex items-center justify-center border border-red-500 shadow-[0_0_20px_rgba(220,38,38,0.5)]">
+                        <span class="text-xl font-black text-white">18+</span>
+                    </div>
+                    <h1 id="txt-title" class="text-2xl md:text-3xl font-black mb-3 uppercase tracking-wide">
+                        Только <span class="text-red-500">Взрослые</span>
+                    </h1>
+                    <p id="txt-subtitle" class="text-gray-300 text-xs mb-8 font-medium leading-relaxed">
+                        Этот сайт содержит материалы 18+.<br>Вы подтверждаете свой возраст?
+                    </p>
+                    <div class="flex flex-col gap-3 relative z-50">
+                        <button onclick="gotoChoice()" class="w-full bg-gradient-to-r from-red-700 to-red-600 text-white font-bold py-4 rounded-xl uppercase tracking-wider text-lg shadow-lg pulse-btn active:scale-95 transition-transform">
+                            <span id="btn-yes">Да, мне есть 18</span>
+                        </button>
+                        <button onclick="exitSite()" class="w-full bg-transparent border border-gray-600 text-gray-400 hover:text-white py-3 rounded-xl uppercase text-xs">
+                            <span id="btn-no">Нет, выход</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. CHOICE (Quiz vs Skip) -->
+                <div id="view-choice" class="hidden glass-panel p-6 md:p-8 rounded-2xl text-center border-t-4 border-blue-500 fade-in">
+                    <h2 id="txt-choice-title" class="text-xl md:text-2xl font-black mb-2 uppercase text-white">Выберите путь</h2>
+                    <p id="txt-choice-sub" class="text-gray-300 text-xs mb-8">Как вы хотите продолжить?</p>
+                    
+                    <button onclick="startQuiz()" class="w-full mb-4 relative overflow-hidden bg-gradient-to-r from-blue-700 to-blue-600 p-5 rounded-xl text-left border border-blue-400/30 active:scale-95 transition-transform shadow-lg">
+                        <div class="relative z-10">
+                            <div class="text-[10px] text-blue-200 font-bold uppercase mb-1 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-blue-300 animate-pulse"></span>
+                                <span id="txt-rec">Рекомендуется</span>
+                            </div>
+                            <div id="btn-choice-quiz" class="text-lg font-bold uppercase">Подобрать пару</div>
+                            <div id="txt-choice-quiz-desc" class="text-[10px] text-blue-100 opacity-80 mt-1">Пройти тест на совместимость (30 сек)</div>
+                        </div>
+                    </button>
+
+                    <button onclick="redirectSmartlink()" class="w-full bg-black/40 border border-gray-600 p-4 rounded-xl text-left active:bg-gray-800 transition-colors">
+                        <div id="btn-choice-skip" class="text-sm font-bold text-gray-300 uppercase">Пропустить и смотреть анкеты</div>
+                        <div class="text-[10px] text-gray-500 mt-1">Качество совпадений может быть ниже</div>
+                    </button>
+                </div>
+
+                <!-- 3. QUIZ (3 Questions) -->
+                <div id="view-quiz" class="hidden glass-panel p-6 rounded-2xl border-t-4 border-orange-500 fade-in relative">
+                    <div class="w-full h-1.5 progress-bar-container mb-6">
+                        <div id="quiz-progress" class="h-full progress-bar-fill" style="width: 33%"></div>
+                    </div>
+
+                    <div id="quiz-content">
+                        <h3 id="quiz-question" class="text-xl font-bold mb-6 text-center min-h-[4rem] flex items-center justify-center">
+                            <!-- Question Text Here -->
+                        </h3>
+                        <div id="quiz-options" class="flex flex-col gap-3">
+                            <!-- JS Generated Buttons -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. PROCESSING (Animation) -->
+                <div id="view-processing" class="hidden glass-panel p-8 rounded-2xl text-center border-t-4 border-green-500 fade-in">
+                    <div class="w-16 h-16 mx-auto mb-6 relative">
+                        <div class="absolute inset-0 border-4 border-gray-600 rounded-full opacity-30"></div>
+                        <div class="absolute inset-0 border-4 border-t-green-500 rounded-full animate-spin"></div>
+                    </div>
+                    <div id="process-log" class="text-left text-xs font-mono text-green-400 bg-black/50 p-4 rounded-lg h-32 flex flex-col justify-end overflow-hidden mb-4 border border-green-900/50">
+                        <!-- JS Logs -->
+                    </div>
+                    <p id="txt-analyzing" class="text-sm font-bold animate-pulse text-white">Анализ анкет...</p>
+                </div>
+
+                <!-- 5. RESULT (Final) -->
+                <div id="view-result" class="hidden glass-panel p-6 md:p-8 rounded-2xl text-center border-t-4 border-red-600 fade-in">
+                    <div class="mb-6">
+                        <div class="inline-block px-4 py-1 rounded-full bg-green-500/20 text-green-400 text-[10px] font-bold border border-green-500/50 mb-4 animate-bounce">
+                            <span id="txt-match-found">УСПЕХ! СОВПАДЕНИЕ НАЙДЕНО</span>
+                        </div>
+                        <h2 id="txt-ready" class="text-2xl md:text-3xl font-black uppercase mb-2">Анкета Готова</h2>
+                        <p id="txt-ready-sub" class="text-gray-300 text-xs">Мы подобрали девушек по вашим параметрам.</p>
+                    </div>
+
+                    <div class="p-4 bg-black/40 rounded-xl mb-6 border border-gray-700">
+                        <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
+                            <span id="txt-criteria-age">Возраст:</span> <span class="text-white">OK</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
+                            <span id="txt-criteria-goal">Цель:</span> <span class="text-white">OK</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-gray-400">
+                            <span id="txt-criteria-loc">Локация:</span> <span class="text-green-400 font-bold">Рядом (1 км)</span>
+                        </div>
+                    </div>
+
+                    <button onclick="redirectSmartlink()" class="w-full bg-gradient-to-r from-green-600 to-green-500 text-white font-bold py-4 rounded-xl uppercase tracking-wider text-lg md:text-xl shadow-[0_0_20px_rgba(34,197,94,0.4)] pulse-green active:scale-95 transition-transform">
+                        <span id="btn-show">Показать Партнера</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: CHAT (Hidden on Mobile) -->
+            <div id="live-chat" class="hidden md:flex glass-panel w-80 rounded-2xl fade-in z-10 border-r-4 border-r-green-500/50 flex-shrink-0 h-[500px] flex-col">
+                <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/20 rounded-t-2xl">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-green-500 online-dot"></div>
+                        <span id="txt-chat-title" class="text-sm font-bold tracking-wide">LIVE ONLINE</span>
+                    </div>
+                    <span class="text-xs text-gray-400 bg-white/10 px-2 py-0.5 rounded-full">4,209</span>
+                </div>
+
+                <div class="chat-scroll-container p-2 relative flex-grow">
+                    <div id="chat-track" class="flex flex-col justify-end gap-2 pb-2"></div>
+                </div>
+                
+                <div class="p-3 border-t border-white/10 bg-black/20 rounded-b-2xl relative">
+                    <div id="chat-toast" class="chat-toast"><span id="txt-chat-alert">Подтвердите возраст!</span></div>
+                    <div onclick="tryChat()" class="h-8 bg-white/5 rounded-full border border-white/10 flex items-center px-3 cursor-pointer hover:bg-white/10">
+                        <span id="txt-chat-placeholder" class="text-[10px] text-gray-500 italic">Написать...</span>
+                    </div>
                 </div>
             </div>
 
-            <h1 class="text-2xl md:text-3xl font-black mb-2 tracking-wide text-white uppercase drop-shadow-lg">
-                <span id="txt-title-prefix" class="translatable">Только</span> 
-                <span id="txt-title-suffix" class="text-red-500 translatable">для взрослых</span>
-            </h1>
-            
-            <p id="txt-subtitle" class="text-gray-200 text-xs mb-6 leading-relaxed font-semibold shadow-black drop-shadow-md translatable">
-                Сайт содержит материалы только для взрослых.<br>Пожалуйста, подтвердите возраст.
-            </p>
-
-            <div class="flex flex-col gap-3 w-full">
-                <button onclick="enterSite()" class="group pulse-btn relative w-full bg-red-600/80 hover:bg-red-600 text-white font-bold py-4 rounded-lg uppercase tracking-wider text-base md:text-lg shadow-lg transform transition-all active:scale-95 flex items-center justify-center overflow-hidden border border-red-400/30">
-                    <span id="txt-btn-yes" class="relative z-10 flex items-center gap-2 translatable">
-                        Да, мне 18+
-                    </span>
-                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1s_infinite]"></div>
-                </button>
-
-                <button onclick="exitSite()" class="w-full bg-black/40 hover:bg-white/10 border border-gray-500/50 hover:border-white text-gray-300 hover:text-white font-semibold py-3 rounded-lg uppercase tracking-wide text-xs transition-all duration-300">
-                    <span id="txt-btn-no" class="translatable">Нет, мне меньше 18</span>
-                </button>
-            </div>
-
-            <div class="mt-4 text-[10px] text-gray-300 opacity-80">
-                <span id="txt-footer-prefix" class="translatable">Продолжая, вы соглашаетесь с</span> 
-                <a href="#" id="txt-footer-link" class="underline hover:text-red-400 transition-colors translatable">правилами</a>.
-            </div>
         </div>
-
-        <!-- ПРАВАЯ КОЛОНКА: ЧАТ -->
-        <div id="live-chat" class="hidden md:block glass-panel w-80 rounded-2xl fade-in-up z-10 order-2 border-r-4 border-r-green-500/50 flex-shrink-0" style="animation-delay: 0.3s;">
-            <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/20 rounded-t-2xl">
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-green-500 online-dot"></div>
-                    <span id="txt-chat-title" class="text-sm font-bold tracking-wide translatable">LIVE СЕЙЧАС</span>
-                </div>
-                <span class="text-xs text-gray-400 bg-white/10 px-2 py-0.5 rounded-full">4,209 online</span>
-            </div>
-
-            <div class="chat-scroll-container p-2 relative">
-                <div id="chat-track" class="chat-track"></div>
-            </div>
-            
-            <div class="p-3 border-t border-white/10 bg-black/20 rounded-b-2xl relative">
-                <div id="chat-toast" class="chat-toast">
-                    <span id="txt-chat-alert">Девушки увидят сообщение только после подтверждения возраста!</span>
-                </div>
-
-                <div onclick="tryChat()" class="h-8 bg-white/5 rounded-full border border-white/10 flex items-center px-3 cursor-pointer hover:bg-white/10 transition-colors">
-                    <span id="txt-chat-placeholder" class="text-[10px] text-gray-500 italic translatable">Войдите, чтобы ответить...</span>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        // --- ДАННЫЕ ДЛЯ ЧАТА ---
-        const chatData = {
-            ru: [
-                { name: "Алиса", msg: "Привет! Кто тут скучает? 😉" },
-                { name: "Elena_Fit", msg: "Ищу парня на вечер..." },
-                { name: "Katy22", msg: "Пришли фото, сладкий)" },
-                { name: "Masha", msg: "Как дела, красавчик?" },
-                { name: "Vika_Love", msg: "Я только из душа... 🔥" },
-                { name: "Анна", msg: "Хочу познакомиться!" },
-                { name: "Olya_Kiss", msg: "Ты здесь? Ответь мне..." },
-                { name: "Kristina", msg: "Мне так одиноко сегодня" },
-                { name: "Svetlana", msg: "Покажешь себя?" },
-                { name: "Nata88", msg: "Привет, милый!" }
-            ],
-            en: [
-                { name: "Alice", msg: "Hey! Who's bored here? 😉" },
-                { name: "Jessica_Fit", msg: "Looking for fun tonight..." },
-                { name: "Katy22", msg: "Send me a pic, honey)" },
-                { name: "Amanda", msg: "How are you doing, handsome?" },
-                { name: "Vicky_Love", msg: "Fresh out of the shower... 🔥" },
-                { name: "Sarah", msg: "Want to chat?" },
-                { name: "Nicole_Kiss", msg: "Are you there? Answer me..." },
-                { name: "Christina", msg: "Feeling lonely tonight" },
-                { name: "Ashley", msg: "Show me yourself?" },
-                { name: "Natalie88", msg: "Hi sweetie!" }
-            ],
-            de: [
-                { name: "Laura", msg: "Hey! Wer langweilt sich? 😉" },
-                { name: "Julia_Fit", msg: "Suche Spaß für heute Abend..." },
-                { name: "Lisa22", msg: "Schick mir ein Foto)" },
-                { name: "Sophie", msg: "Wie geht's, Schöner?" },
-                { name: "Hanna_Love", msg: "Frisch aus der Dusche... 🔥" },
-                { name: "Mia", msg: "Willst du chatten?" },
-                { name: "Lena_Kiss", msg: "Bist du da? Antworte mir..." },
-                { name: "Sarah", msg: "Fühle mich einsam heute" },
-                { name: "Emma", msg: "Zeigst du dich?" },
-                { name: "Lara88", msg: "Hallo Süßer!" }
-            ],
-            fr: [
-                { name: "Chloé", msg: "Salut ! Qui s'ennuie ? 😉" },
-                { name: "Manon_Fit", msg: "Je cherche à m'amuser ce soir..." },
-                { name: "Camille22", msg: "Envoie-moi une photo)" },
-                { name: "Léa", msg: "Comment ça va, beau gosse ?" },
-                { name: "Julie_Love", msg: "Je sors de la douche... 🔥" },
-                { name: "Marie", msg: "Tu veux discuter ?" },
-                { name: "Lucie_Kiss", msg: "Tu es là ? Réponds-moi..." },
-                { name: "Sarah", msg: "Je me sens seule ce soir" },
-                { name: "Anaïs", msg: "Tu te montres ?" },
-                { name: "Clara88", msg: "Salut chéri !" }
-            ],
-            it: [
-                { name: "Sofia", msg: "Ehi! Chi si annoia qui? 😉" },
-                { name: "Giulia_Fit", msg: "Cerco divertimento stasera..." },
-                { name: "Martina22", msg: "Mandami una foto)" },
-                { name: "Chiara", msg: "Come va, bello?" },
-                { name: "Alice_Love", msg: "Appena uscita dalla doccia... 🔥" },
-                { name: "Sara", msg: "Vuoi chattare?" },
-                { name: "Francesca", msg: "Sei lì? Rispondimi..." },
-                { name: "Elena", msg: "Mi sento sola stasera" },
-                { name: "Silvia", msg: "Ti mostri?" },
-                { name: "Anna88", msg: "Ciao dolcezza!" }
-            ],
-            nl: [
-                { name: "Emma", msg: "Hoi! Wie verveelt zich? 😉" },
-                { name: "Sophie_Fit", msg: "Op zoek naar plezier vanavond..." },
-                { name: "Julia22", msg: "Stuur me een foto)" },
-                { name: "Mila", msg: "Hoe gaat het, knappe man?" },
-                { name: "Tess_Love", msg: "Net uit de douche... 🔥" },
-                { name: "Lotte", msg: "Wil je chatten?" },
-                { name: "Zoë_Kiss", msg: "Ben je daar? Antwoord me..." },
-                { name: "Eva", msg: "Voel me eenzaam vanavond" },
-                { name: "Anna", msg: "Laat je jezelf zien?" },
-                { name: "Lisa88", msg: "Hoi schatje!" }
-            ],
-            pl: [
-                { name: "Kasia", msg: "Hej! Kto się nudzi? 😉" },
-                { name: "Ania_Fit", msg: "Szukam zabawy na wieczór..." },
-                { name: "Julia22", msg: "Wyślij mi fotkę)" },
-                { name: "Zuzia", msg: "Jak tam, przystojniaku?" },
-                { name: "Maja_Love", msg: "Właśnie wyszłam spod prysznica... 🔥" },
-                { name: "Ola", msg: "Chcesz popisać?" },
-                { name: "Natalia", msg: "Jesteś tam? Odpowiedz..." },
-                { name: "Wiktoria", msg: "Czuję się samotna" },
-                { name: "Emilia", msg: "Pokażesz się?" },
-                { name: "Karolina", msg: "Hej słodziaku!" }
-            ],
-            es: [
-                { name: "Sofía", msg: "¡Hola! ¿Quién está aburrido? 😉" },
-                { name: "Lucía_Fit", msg: "Busco diversión esta noche..." },
-                { name: "Martina22", msg: "Envíame una foto)" },
-                { name: "María", msg: "¿Cómo estás, guapo?" },
-                { name: "Paula_Love", msg: "Recién salida de la ducha... 🔥" },
-                { name: "Daniela", msg: "¿Quieres chatear?" },
-                { name: "Valeria", msg: "¿Estás ahí? Respóndeme..." },
-                { name: "Julia", msg: "Me siento sola esta noche" },
-                { name: "Alba", msg: "¿Te muestras?" },
-                { name: "Sara88", msg: "¡Hola cariño!" }
-            ],
-            sv: [
-                { name: "Anna", msg: "Hej! Vem har tråkigt? 😉" },
-                { name: "Elsa_Fit", msg: "Söker kul ikväll..." },
-                { name: "Maja22", msg: "Skicka en bild)" },
-                { name: "Alma", msg: "Hur mår du, snygging?" },
-                { name: "Wilma_Love", msg: "Nyduschad... 🔥" },
-                { name: "Klara", msg: "Vill du chatta?" },
-                { name: "Ebba_Kiss", msg: "Är du där? Svara mig..." },
-                { name: "Linnea", msg: "Känner mig ensam ikväll" },
-                { name: "Molly", msg: "Visar du dig?" },
-                { name: "Hanna88", msg: "Hej sötnos!" }
-            ]
-        };
+        /* --- CONFIGURATION --- */
+        const SMARTLINK_URL = "https://tone.affomelody.com/click?pid=40187&offer_id=25";
+        const FALLBACK_URL = "https://t.me/the_serp_real";
 
-        // --- ЛОГИКА "ЖИВОГО" ЧАТА ---
-        let chatTimeout;
+        /* --- STATE --- */
+        var currentLang = 'ru';
+        var quizStep = 0;
 
-        function startChat(lang) {
-            const track = document.getElementById('chat-track');
-            clearTimeout(chatTimeout);
-
-            if (track.children.length === 0) {
-               for(let i=0; i<3; i++) addRandomMessage(lang, false);
-            }
-            loopChat(lang);
-        }
-
-        function loopChat(lang) {
-            const delay = Math.random() * 3000 + 1500; 
-            
-            chatTimeout = setTimeout(() => {
-                addRandomMessage(lang, true);
-                loopChat(lang);
-            }, delay);
-        }
-
-        function addRandomMessage(lang, animate) {
-            const messages = chatData[lang] || chatData['en'];
-            const randomItem = messages[Math.floor(Math.random() * messages.length)];
-            const randomAvatarIdx = Math.floor(Math.random() * 50) + 1;
-            const avatarUrl = `https://i.pravatar.cc/150?img=${randomAvatarIdx}`;
-
-            const div = document.createElement('div');
-            div.className = `chat-message flex items-center gap-3 p-2 rounded-lg cursor-default ${animate ? 'chat-message-new' : ''}`;
-            
-            div.innerHTML = `
-                <div class="relative flex-shrink-0">
-                    <img src="${avatarUrl}" class="w-10 h-10 rounded-full object-cover border border-white/20" alt="${randomItem.name}">
-                    <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-black"></div>
-                </div>
-                <div class="flex flex-col overflow-hidden">
-                    <div class="flex items-center justify-between gap-2">
-                        <span class="text-xs font-bold text-red-400 truncate">${randomItem.name}</span>
-                        <span class="text-[10px] text-gray-500">now</span>
-                    </div>
-                    <p class="text-xs text-gray-200 truncate">${randomItem.msg}</p>
-                </div>
-            `;
-
-            const track = document.getElementById('chat-track');
-            track.appendChild(div);
-
-            if (track.children.length > 6) {
-                track.removeChild(track.children[0]);
-            }
-        }
-
-        // --- ПЕРЕВОДЫ ИНТЕРФЕЙСА ---
+        /* --- TRANSLATIONS --- */
+        // Renamed 't' to 'translations' to avoid conflicts
         const translations = {
             ru: {
-                titlePrefix: "Только",
-                titleSuffix: "для взрослых",
-                subtitle: "Сайт содержит материалы только для взрослых.<br>Пожалуйста, подтвердите возраст.",
-                btnYes: "Да, мне 18+",
-                btnNo: "Нет, мне меньше 18",
-                footerPrefix: "Продолжая, вы соглашаетесь с",
-                footerLink: "правилами",
-                chatTitle: "LIVE СЕЙЧАС",
-                chatPlaceholder: "Войдите, чтобы ответить...",
-                chatAlert: "Девушки увидят сообщение только после подтверждения возраста!"
+                title: 'Только <span class="text-red-500">Взрослые</span>',
+                subtitle: 'Этот сайт содержит материалы 18+.<br>Вы подтверждаете свой возраст?',
+                btnYes: 'Да, мне есть 18',
+                btnNo: 'Нет, выход',
+                // Choice
+                choiceTitle: 'Выберите путь',
+                choiceSub: 'Как вы хотите продолжить?',
+                rec: 'Рекомендуется',
+                btnChoiceQuiz: 'Подобрать пару',
+                btnChoiceQuizDesc: 'Пройти тест на совместимость (30 сек)',
+                btnChoiceSkip: 'Пропустить и смотреть анкеты',
+                // Quiz
+                q1: 'Ваш возраст?',
+                q1_opt1: '18 - 25 лет',
+                q1_opt2: '25 - 40 лет',
+                q1_opt3: '40+ лет',
+                q2: 'Какая ваша цель?',
+                q2_opt1: 'Серьезные отношения',
+                q2_opt2: 'Просто общение',
+                q2_opt3: 'Секс / Развлечения',
+                q3: 'Важен ли внешность?',
+                q3_opt1: 'Да, очень важна',
+                q3_opt2: 'Нет, главное харизма',
+                // Process
+                analyzing: 'Анализ совместимости...',
+                logs: ['Подключение к базе...', 'Фильтрация ботов...', 'Анализ геолокации...', 'Подбор кандидатов...', 'Готово!'],
+                // Result
+                matchFound: 'УСПЕХ! СОВПАДЕНИЕ НАЙДЕНО',
+                ready: 'Анкета Готова',
+                readySub: 'Мы подобрали девушек по вашим параметрам.',
+                critAge: 'Возраст:',
+                critGoal: 'Цель:',
+                critLoc: 'Локация:',
+                btnShow: 'Показать Партнера',
+                // Chat
+                chatTitle: 'LIVE СЕЙЧАС',
+                chatPlaceholder: 'Войдите, чтобы ответить...',
+                chatAlert: 'Сначала пройдите проверку!'
             },
             en: {
-                titlePrefix: "Adults",
-                titleSuffix: "Only",
-                subtitle: "This website contains age-restricted materials.<br>Please confirm your age.",
-                btnYes: "Yes, I am 18+",
-                btnNo: "No, I am under 18",
-                footerPrefix: "By continuing, you agree to the",
-                footerLink: "terms",
-                chatTitle: "LIVE NOW",
-                chatPlaceholder: "Login to reply...",
-                chatAlert: "Girls will see your message only after age verification!"
-            },
-            de: {
-                titlePrefix: "Nur für",
-                titleSuffix: "Erwachsene",
-                subtitle: "Diese Website enthält Materialien nur für Erwachsene.<br>Bitte bestätigen Sie Ihr Alter.",
-                btnYes: "Ja, ich bin 18+",
-                btnNo: "Nein, jünger als 18",
-                footerPrefix: "Wenn Sie fortfahren, akzeptieren Sie die",
-                footerLink: "Bedingungen",
-                chatTitle: "LIVE JETZT",
-                chatPlaceholder: "Einloggen zum Antworten...",
-                chatAlert: "Mädchen sehen Ihre Nachricht erst nach der Altersbestätigung!"
-            },
-            fr: {
-                titlePrefix: "Adultes",
-                titleSuffix: "Uniquement",
-                subtitle: "Ce site contient du matériel pour adultes.<br>Veuillez confirmer votre âge.",
-                btnYes: "Oui, j'ai 18+",
-                btnNo: "Non, moins de 18",
-                footerPrefix: "En continuant, vous acceptez les",
-                footerLink: "termes",
-                chatTitle: "EN DIRECT",
-                chatPlaceholder: "Connectez-vous pour répondre...",
-                chatAlert: "Les filles ne verront votre message qu'après vérification de l'âge !"
-            },
-            it: {
-                titlePrefix: "Solo",
-                titleSuffix: "Adulti",
-                subtitle: "Questo sito contiene materiale per adulti.<br>Conferma la tua età.",
-                btnYes: "Sì, ho 18+",
-                btnNo: "No, meno di 18",
-                footerPrefix: "Continuando, accetti i",
-                footerLink: "termini",
-                chatTitle: "IN DIRETTA",
-                chatPlaceholder: "Accedi per rispondere...",
-                chatAlert: "Le ragazze vedranno il tuo messaggio solo dopo la verifica dell'età!"
-            },
-            nl: {
-                titlePrefix: "Alleen",
-                titleSuffix: "Volwassenen",
-                subtitle: "Deze website bevat materiaal voor volwassenen.<br>Bevestig uw leeftijd.",
-                btnYes: "Ja, ik ben 18+",
-                btnNo: "Nee, jonger dan 18",
-                footerPrefix: "Door verder te gaan, gaat u akkoord met de",
-                footerLink: "voorwaarden",
-                chatTitle: "NU LIVE",
-                chatPlaceholder: "Inloggen om te antwoorden...",
-                chatAlert: "Meisjes zien je bericht pas na leeftijdsverificatie!"
-            },
-            pl: {
-                titlePrefix: "Tylko",
-                titleSuffix: "dorośli",
-                subtitle: "Ta strona zawiera treści dla dorosłych.<br>Potwierdź swój wiek.",
-                btnYes: "Tak, mam 18+",
-                btnNo: "Nie, mam mniej niż 18",
-                footerPrefix: "Kontynuując, akceptujesz",
-                footerLink: "regulamin",
-                chatTitle: "NA ŻYWO",
-                chatPlaceholder: "Zaloguj się, aby odpowiedzieć...",
-                chatAlert: "Dziewczyny zobaczą Twoją wiadomość dopiero po weryfikacji wieku!"
-            },
-            es: {
-                titlePrefix: "Solo",
-                titleSuffix: "Adultos",
-                subtitle: "Este sitio contiene material para adultos.<br>Por favor confirma tu edad.",
-                btnYes: "Sí, tengo 18+",
-                btnNo: "No, tengo menos de 18",
-                footerPrefix: "Al continuar, aceptas los",
-                footerLink: "términos",
-                chatTitle: "EN VIVO",
-                chatPlaceholder: "Inicia sesión para responder...",
-                chatAlert: "¡Las chicas verán tu mensaje solo después de la verificación de edad!"
-            },
-            sv: {
-                titlePrefix: "Endast",
-                titleSuffix: "Vuxna",
-                subtitle: "Denna webbplats innehåller material för vuxna.<br>Vänligen bekräfta din ålder.",
-                btnYes: "Ja, jag är 18+",
-                btnNo: "Nej, under 18",
-                footerPrefix: "Genom att fortsätta godkänner du",
-                footerLink: "villkoren",
-                chatTitle: "LIVE NU",
-                chatPlaceholder: "Logga in för att svara...",
-                chatAlert: "Tjejer ser ditt meddelande först efter åldersverifiering!"
+                title: 'Adults <span class="text-red-500">Only</span>',
+                subtitle: 'This site contains 18+ material.<br>Do you confirm your age?',
+                btnYes: 'Yes, I am 18+',
+                btnNo: 'No, Exit',
+                choiceTitle: 'Choose Path',
+                choiceSub: 'How do you want to proceed?',
+                rec: 'Recommended',
+                btnChoiceQuiz: 'Find a Match',
+                btnChoiceQuizDesc: 'Take compatibility quiz (30s)',
+                btnChoiceSkip: 'Skip to Photos',
+                q1: 'Your Age?',
+                q1_opt1: '18 - 25 years',
+                q1_opt2: '25 - 40 years',
+                q1_opt3: '40+ years',
+                q2: 'Your Goal?',
+                q2_opt1: 'Serious Relationship',
+                q2_opt2: 'Just Chatting',
+                q2_opt3: 'Fun / Casual / Sex',
+                q3: 'Looks Matter?',
+                q3_opt1: 'Yes, very much',
+                q3_opt2: 'No, vibe is key',
+                analyzing: 'Analyzing compatibility...',
+                logs: ['Connecting to DB...', 'Filtering bots...', 'Checking geolocation...', 'Matching profiles...', 'Done!'],
+                matchFound: 'SUCCESS! MATCH FOUND',
+                ready: 'Profile Ready',
+                readySub: 'We found girls matching your preferences.',
+                critAge: 'Age:',
+                critGoal: 'Goal:',
+                critLoc: 'Location:',
+                btnShow: 'Show Partner',
+                chatTitle: 'LIVE NOW',
+                chatPlaceholder: 'Login to reply...',
+                chatAlert: 'Verify age first!'
             }
         };
 
-        let currentLang = 'ru';
+        // Fallback languages (copy EN to others)
+        ['de', 'fr', 'it', 'nl', 'pl', 'es', 'sv'].forEach(l => translations[l] = translations.en);
+        // Небольшой перевод для немецкого для примера
+        translations.de = {
+            ...translations.en,
+            title: 'Nur <span class="text-red-500">Erwachsene</span>',
+            btnYes: 'Ja, ich bin 18+',
+            btnNo: 'Nein',
+            choiceTitle: 'Wähle den Weg',
+            btnChoiceQuiz: 'Partner finden',
+            btnChoiceSkip: 'Überspringen'
+        };
 
+        /* --- LOGIC FLOW --- */
         function setLang(lang) {
-            if (currentLang === lang) return;
             currentLang = lang;
-
-            document.getElementById('lang-ru').classList.toggle('active', lang === 'ru');
-            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
-
-            const elements = [
-                { id: 'txt-title-prefix', key: 'titlePrefix' },
-                { id: 'txt-title-suffix', key: 'titleSuffix' },
-                { id: 'txt-subtitle', key: 'subtitle', isHTML: true },
-                { id: 'txt-btn-yes', key: 'btnYes' },
-                { id: 'txt-btn-no', key: 'btnNo' },
-                { id: 'txt-footer-prefix', key: 'footerPrefix' },
-                { id: 'txt-footer-link', key: 'footerLink' },
-                { id: 'txt-chat-title', key: 'chatTitle' },
-                { id: 'txt-chat-placeholder', key: 'chatPlaceholder' },
-                { id: 'txt-chat-alert', key: 'chatAlert' }
-            ];
-
-            elements.forEach(el => {
-                const domEl = document.getElementById(el.id);
-                if(domEl) domEl.classList.add('text-vaporize');
-            });
             
-            const chatPanel = document.getElementById('chat-track');
-            chatPanel.style.opacity = '0';
-            chatPanel.style.transition = 'opacity 0.5s';
+            document.querySelectorAll('.lang-switch-btn').forEach(el => el.classList.remove('active'));
+            const btn = document.getElementById(`lang-${lang === 'ru' ? 'ru' : 'en'}`);
+            if(btn) btn.classList.add('active');
 
-            clearTimeout(chatTimeout);
+            const dict = translations[lang];
+            const setText = (id, text) => {
+                const el = document.getElementById(id);
+                if(el) el.innerHTML = text;
+            };
 
-            setTimeout(() => {
-                elements.forEach(el => {
-                    const domEl = document.getElementById(el.id);
-                    if(domEl) {
-                        const dict = translations[lang] || translations['en'];
-                        
-                        if (el.isHTML) {
-                            domEl.innerHTML = dict[el.key];
-                        } else {
-                            domEl.innerText = dict[el.key];
-                        }
-                        domEl.classList.remove('text-vaporize');
-                    }
-                });
+            // Main
+            setText('txt-title', dict.title);
+            setText('txt-subtitle', dict.subtitle);
+            setText('btn-yes', dict.btnYes);
+            setText('btn-no', dict.btnNo);
+            // Choice
+            setText('txt-choice-title', dict.choiceTitle);
+            setText('txt-choice-sub', dict.choiceSub);
+            setText('txt-rec', dict.rec);
+            setText('btn-choice-quiz', dict.btnChoiceQuiz);
+            setText('txt-choice-quiz-desc', dict.btnChoiceQuizDesc);
+            setText('btn-choice-skip', dict.btnChoiceSkip);
+            // Result
+            setText('txt-analyzing', dict.analyzing);
+            setText('txt-match-found', dict.matchFound);
+            setText('txt-ready', dict.ready);
+            setText('txt-ready-sub', dict.readySub);
+            setText('txt-criteria-age', dict.critAge);
+            setText('txt-criteria-goal', dict.critGoal);
+            setText('txt-criteria-loc', dict.critLoc);
+            setText('btn-show', dict.btnShow);
+            // Chat
+            setText('txt-chat-title', dict.chatTitle);
+            setText('txt-chat-placeholder', dict.chatPlaceholder);
+            setText('txt-chat-alert', dict.chatAlert);
 
-                document.getElementById('chat-track').innerHTML = '';
-                startChat(lang);
-                chatPanel.style.opacity = '1';
+            if(quizStep > 0 && quizStep <= 3) renderQuizStep(quizStep);
+            
+            // Restart chat in new language
+            document.getElementById('chat-track').innerHTML = ''; 
+            startChat();
+        }
+
+        // NAVIGATION
+        function gotoChoice() {
+            document.getElementById('view-age-gate').classList.add('hidden');
+            document.getElementById('view-choice').classList.remove('hidden');
+        }
+
+        function startQuiz() {
+            document.getElementById('view-choice').classList.add('hidden');
+            document.getElementById('view-quiz').classList.remove('hidden');
+            quizStep = 1;
+            renderQuizStep(1);
+        }
+
+        function renderQuizStep(step) {
+            const dict = translations[currentLang];
+            const qEl = document.getElementById('quiz-question');
+            const optsEl = document.getElementById('quiz-options');
+            const progress = document.getElementById('quiz-progress');
+
+            optsEl.innerHTML = ''; 
+
+            let qText = '';
+            let options = [];
+
+            if (step === 1) {
+                qText = dict.q1;
+                options = [dict.q1_opt1, dict.q1_opt2, dict.q1_opt3];
+                progress.style.width = '33%';
+            } else if (step === 2) {
+                qText = dict.q2;
+                options = [dict.q2_opt1, dict.q2_opt2, '<span class="text-red-400 font-bold">' + dict.q2_opt3 + '</span>'];
+                progress.style.width = '66%';
+            } else if (step === 3) {
+                qText = dict.q3;
+                options = [dict.q3_opt1, dict.q3_opt2];
+                progress.style.width = '100%';
+            }
+
+            qEl.innerHTML = qText;
+
+            options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full bg-white/10 hover:bg-white/20 border border-white/10 p-4 rounded-xl text-left text-sm font-bold text-white transition-colors flex items-center justify-between group active:scale-95";
+                btn.innerHTML = `<span>${opt}</span> <div class="w-4 h-4 rounded-full border border-gray-400 group-hover:bg-red-500 group-hover:border-red-500 transition-colors"></div>`;
+                btn.onclick = () => nextStep();
+                optsEl.appendChild(btn);
+            });
+        }
+
+        function nextStep() {
+            quizStep++;
+            if (quizStep > 3) {
+                startProcessing();
+            } else {
+                setTimeout(() => renderQuizStep(quizStep), 150);
+            }
+        }
+
+        function startProcessing() {
+            document.getElementById('view-quiz').classList.add('hidden');
+            document.getElementById('view-processing').classList.remove('hidden');
+            
+            const logContainer = document.getElementById('process-log');
+            const logs = translations[currentLang].logs;
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i >= logs.length) {
+                    clearInterval(interval);
+                    setTimeout(showResult, 800);
+                    return;
+                }
+                const div = document.createElement('div');
+                div.className = 'processing-item active text-[10px] md:text-xs mb-1';
+                div.innerText = `> ${logs[i]}`;
+                logContainer.appendChild(div);
+                if(i > 0) logContainer.children[i-1].classList.add('done');
+                i++;
             }, 500);
         }
 
-        function enterSite() {
-            const container = document.getElementById('main-container');
-            container.style.opacity = '0';
-            container.style.transform = 'translateY(10px)';
-            container.style.transition = 'all 0.5s ease';
-            localStorage.setItem('ageVerified', 'true');
-            setTimeout(() => {
-                window.location.href = "https://tone.affomelody.com/click?pid=40187&offer_id=25";
-            }, 500);
+        function showResult() {
+            document.getElementById('view-processing').classList.add('hidden');
+            document.getElementById('view-result').classList.remove('hidden');
+        }
+
+        function redirectSmartlink() {
+            window.location.href = SMARTLINK_URL;
         }
 
         function exitSite() {
-            window.location.href = "https://t.me/the_serp_real";
+            window.location.href = FALLBACK_URL;
+        }
+
+        /* --- CHAT SYSTEM (Women Only Avatars) --- */
+        const chatNames = ["Alice", "Elena", "Katy", "Masha", "Vika", "Anna"];
+        const chatMsgs = {
+            ru: ["Привет!", "Кто тут?", "Скучно...", "Ищу парня", "Есть кто 30+?"],
+            en: ["Hi!", "Anyone here?", "So bored...", "Looking for fun", "Hey guys"]
+        };
+
+        var chatTimeout;
+        function startChat() {
+            const track = document.getElementById('chat-track');
+            clearTimeout(chatTimeout);
+            // Add initial messages if empty
+            if (track.children.length === 0) {
+                for(let i=0; i<3; i++) addMsg(false);
+            }
+            loopChat();
+        }
+
+        function loopChat() {
+            chatTimeout = setTimeout(() => {
+                addMsg(true);
+                loopChat();
+            }, Math.random() * 3000 + 2000);
+        }
+
+        function addMsg(animate) {
+            const msgs = chatMsgs[currentLang] || chatMsgs.en;
+            const msg = msgs[Math.floor(Math.random() * msgs.length)];
+            const name = chatNames[Math.floor(Math.random() * chatNames.length)];
+            const avatarId = Math.floor(Math.random() * 95); // Women only ID
+            const avatarUrl = `https://randomuser.me/api/portraits/women/${avatarId}.jpg`;
+            
+            const div = document.createElement('div');
+            div.className = `chat-message flex items-center gap-3 p-2 rounded-lg cursor-default ${animate ? 'chat-message-new' : ''} bg-white/5 mb-2`;
+            
+            div.innerHTML = `
+                <div class="relative flex-shrink-0">
+                    <img src="${avatarUrl}" class="w-8 h-8 rounded-full object-cover border border-white/20">
+                    <div class="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-black"></div>
+                </div>
+                <div class="flex flex-col overflow-hidden">
+                    <span class="text-[10px] font-bold text-red-400">${name}</span>
+                    <span class="text-[10px] text-gray-200 truncate">${msg}</span>
+                </div>
+            `;
+            const track = document.getElementById('chat-track');
+            track.appendChild(div);
+            if(track.children.length > 5) track.removeChild(track.children[0]);
         }
 
         function tryChat() {
             const toast = document.getElementById('chat-toast');
-            toast.classList.remove('show');
-            void toast.offsetWidth; 
             toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+            setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
-        startChat('ru');
-
+        window.onload = function() {
+            setLang('ru');
+        }
     </script>
 </body>
 </html>
