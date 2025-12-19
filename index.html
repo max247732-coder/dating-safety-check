@@ -5,16 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dating Quiz 18+</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <!-- Добавлены шрифты Oswald (для стиля) и Roboto (для читаемости) -->
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         /* --- CORE STYLES --- */
         body {
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Roboto', sans-serif;
             background-color: #000;
             position: fixed;
             inset: 0;
             width: 100%;
             height: 100%;
+            color: #f3f4f6;
+        }
+
+        h1, h2, h3, .font-heading {
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 0.05em;
         }
 
         * { -webkit-tap-highlight-color: transparent; }
@@ -42,24 +49,24 @@
 
         /* --- GLASSMOPRHISM --- */
         .glass-panel {
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8); 
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9); 
         }
 
         /* --- LANGUAGE BAR --- */
         .lang-btn {
-            opacity: 0.5;
+            opacity: 0.6;
             transition: all 0.3s ease;
             filter: grayscale(80%);
             transform: scale(0.9);
         }
         .lang-btn:hover {
-            opacity: 0.8;
+            opacity: 1;
             transform: scale(1.0);
-            filter: grayscale(20%);
+            filter: grayscale(0%);
         }
         .lang-btn.active {
             opacity: 1;
@@ -67,14 +74,8 @@
             filter: grayscale(0%);
             border-bottom: 2px solid #ef4444;
         }
-        /* Скрываем скроллбар, но оставляем прокрутку */
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         /* --- UI HELPERS --- */
         button {
@@ -86,7 +87,7 @@
         }
 
         .progress-bar-container {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.15);
             border-radius: 99px;
             overflow: hidden;
         }
@@ -101,7 +102,7 @@
             transition: all 0.3s;
         }
         .processing-item.active { opacity: 1; transform: translateX(0); }
-        .processing-item.done { opacity: 0.5; color: #22c55e; }
+        .processing-item.done { opacity: 0.7; color: #4ade80; }
 
         .chat-scroll-container {
             mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
@@ -137,7 +138,7 @@
             color: white;
             padding: 8px 12px;
             border-radius: 8px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: bold;
             pointer-events: none;
             opacity: 0;
@@ -145,6 +146,7 @@
             z-index: 100;
             width: 90%;
             text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
         .chat-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
@@ -153,53 +155,77 @@
 
     <!-- VIDEO BACKGROUND -->
     <div class="fixed inset-0 overflow-hidden z-0 bg-black pointer-events-none">
-        <video id="bg-video" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964" class="w-full h-full object-cover">
+        <video id="bg-video" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964" class="w-full h-full object-cover opacity-60">
             <source src="background.mp4" type="video/mp4">
         </video>
-        <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-black/40 z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90 z-10"></div>
     </div>
 
-    <!-- HEADER: UNIFIED LANGUAGE BAR (Layer 50) -->
-    <!-- Горизонтальная панель с флагами -->
+    <!-- HEADER: UNIFIED LANGUAGE BAR -->
     <div class="absolute top-0 left-0 w-full z-50 p-4 flex justify-center pointer-events-none">
-        <div class="pointer-events-auto bg-black/60 backdrop-blur-md px-2 py-2 rounded-2xl border border-white/10 shadow-2xl max-w-full overflow-hidden">
-            <div id="lang-container" class="flex gap-4 overflow-x-auto hide-scrollbar px-2 items-center">
-                <!-- Кнопки языков генерируются здесь -->
+        <div class="pointer-events-auto bg-gray-900/80 backdrop-blur-md px-3 py-2 rounded-2xl border border-white/20 shadow-2xl max-w-full overflow-hidden">
+            <div id="lang-container" class="flex gap-5 overflow-x-auto hide-scrollbar px-2 items-center">
+                
+                <!-- Tier 1 English -->
                 <button onclick="setLang('en')" id="lang-btn-en" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
                     <span class="text-xl">🇺🇸</span>
-                    <span class="text-[9px] font-bold text-white tracking-wider">EN</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">EN</span>
                 </button>
+                
+                <!-- CIS / Eastern Europe -->
                 <button onclick="setLang('ru')" id="lang-btn-ru" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
                     <span class="text-xl">🇷🇺</span>
-                    <span class="text-[9px] font-bold text-white tracking-wider">RU</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">RU</span>
                 </button>
+                <button onclick="setLang('ua')" id="lang-btn-ua" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇺🇦</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">UA</span>
+                </button>
+                <button onclick="setLang('kz')" id="lang-btn-kz" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇰🇿</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">KZ</span>
+                </button>
+                <button onclick="setLang('az')" id="lang-btn-az" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇦🇿</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">AZ</span>
+                </button>
+                <button onclick="setLang('ro')" id="lang-btn-ro" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇲🇩</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">MD</span>
+                </button>
+                <button onclick="setLang('tk')" id="lang-btn-tk" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇹🇲</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">TM</span>
+                </button>
+
+                <!-- Europe -->
                 <button onclick="setLang('de')" id="lang-btn-de" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
                     <span class="text-xl">🇩🇪</span>
-                    <span class="text-[9px] font-bold text-white tracking-wider">DE</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">DE</span>
                 </button>
                 <button onclick="setLang('fr')" id="lang-btn-fr" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
                     <span class="text-xl">🇫🇷</span>
-                    <span class="text-[9px] font-bold text-white tracking-wider">FR</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">FR</span>
                 </button>
                 <button onclick="setLang('it')" id="lang-btn-it" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
                     <span class="text-xl">🇮🇹</span>
-                    <span class="text-[9px] font-bold text-white tracking-wider">IT</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">IT</span>
                 </button>
                 <button onclick="setLang('es')" id="lang-btn-es" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
                     <span class="text-xl">🇪🇸</span>
-                    <span class="text-[9px] font-bold text-white tracking-wider">ES</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">ES</span>
                 </button>
                 <button onclick="setLang('pl')" id="lang-btn-pl" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
                     <span class="text-xl">🇵🇱</span>
-                    <span class="text-[9px] font-bold text-white tracking-wider">PL</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">PL</span>
                 </button>
                 <button onclick="setLang('nl')" id="lang-btn-nl" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
                     <span class="text-xl">🇳🇱</span>
-                    <span class="text-[9px] font-bold text-white tracking-wider">NL</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">NL</span>
                 </button>
                 <button onclick="setLang('sv')" id="lang-btn-sv" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
                     <span class="text-xl">🇸🇪</span>
-                    <span class="text-[9px] font-bold text-white tracking-wider">SV</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">SE</span>
                 </button>
             </div>
         </div>
@@ -209,25 +235,25 @@
     <div class="absolute inset-0 z-40 overflow-y-auto overflow-x-hidden touch-pan-y">
         <div class="min-h-full flex flex-col md:flex-row items-center justify-center pt-36 pb-32 px-4 gap-8 md:gap-16">
             
-            <!-- LEFT COLUMN -->
+            <!-- LEFT COLUMN: CONTENT -->
             <div id="content-area" class="w-full max-w-sm md:max-w-md flex-shrink-0 relative">
                 
                 <!-- 1. AGE GATE -->
                 <div id="view-age-gate" class="glass-panel p-6 md:p-8 rounded-2xl text-center border-t-4 border-red-600 fade-in">
                     <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-red-600/20 flex items-center justify-center border border-red-500 shadow-[0_0_20px_rgba(220,38,38,0.5)]">
-                        <span class="text-xl font-black text-white">18+</span>
+                        <span class="text-xl font-black text-white font-heading">18+</span>
                     </div>
-                    <h1 id="txt-title" class="text-2xl md:text-3xl font-black mb-3 uppercase tracking-wide">
+                    <h1 id="txt-title" class="text-3xl md:text-4xl font-black mb-3 uppercase tracking-wide text-white drop-shadow-md">
                         Только <span class="text-red-500">Взрослые</span>
                     </h1>
-                    <p id="txt-subtitle" class="text-gray-300 text-xs mb-8 font-medium leading-relaxed">
+                    <p id="txt-subtitle" class="text-gray-100 text-sm mb-8 font-medium leading-relaxed drop-shadow-sm">
                         Этот сайт содержит материалы 18+.<br>Вы подтверждаете свой возраст?
                     </p>
-                    <div class="flex flex-col gap-3 relative z-50">
-                        <button onclick="gotoChoice()" class="w-full bg-gradient-to-r from-red-700 to-red-600 text-white font-bold py-4 rounded-xl uppercase tracking-wider text-lg shadow-lg pulse-btn active:scale-95 transition-transform">
+                    <div class="flex flex-col gap-4 relative z-50">
+                        <button onclick="gotoChoice()" class="w-full bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-bold py-4 rounded-xl uppercase tracking-wider text-lg shadow-lg pulse-btn active:scale-95 transition-transform font-heading">
                             <span id="btn-yes">Да, мне есть 18</span>
                         </button>
-                        <button onclick="exitSite()" class="w-full bg-transparent border border-gray-600 text-gray-400 hover:text-white py-3 rounded-xl uppercase text-xs">
+                        <button onclick="exitSite()" class="w-full bg-white/5 hover:bg-white/10 border border-gray-500 text-gray-200 hover:text-white font-semibold py-3 rounded-xl uppercase text-xs tracking-wide transition-colors">
                             <span id="btn-no">Нет, выход</span>
                         </button>
                     </div>
@@ -235,71 +261,71 @@
 
                 <!-- 2. CHOICE -->
                 <div id="view-choice" class="hidden glass-panel p-6 md:p-8 rounded-2xl text-center border-t-4 border-blue-500 fade-in">
-                    <h2 id="txt-choice-title" class="text-xl md:text-2xl font-black mb-2 uppercase text-white">Выберите путь</h2>
-                    <p id="txt-choice-sub" class="text-gray-300 text-xs mb-8">Как вы хотите продолжить?</p>
+                    <h2 id="txt-choice-title" class="text-2xl md:text-3xl font-black mb-2 uppercase text-white drop-shadow-md">Выберите путь</h2>
+                    <p id="txt-choice-sub" class="text-gray-200 text-sm mb-8 font-medium">Как вы хотите продолжить?</p>
                     
-                    <button onclick="startQuiz()" class="w-full mb-4 relative overflow-hidden bg-gradient-to-r from-blue-700 to-blue-600 p-5 rounded-xl text-left border border-blue-400/30 active:scale-95 transition-transform shadow-lg">
+                    <button onclick="startQuiz()" class="w-full mb-4 relative overflow-hidden bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 p-5 rounded-xl text-left border border-blue-400/30 active:scale-95 transition-transform shadow-lg group">
                         <div class="relative z-10">
-                            <div class="text-[10px] text-blue-200 font-bold uppercase mb-1 flex items-center gap-2">
+                            <div class="text-[10px] text-blue-100 font-bold uppercase mb-1 flex items-center gap-2 font-heading tracking-wider">
                                 <span class="w-2 h-2 rounded-full bg-blue-300 animate-pulse"></span>
                                 <span id="txt-rec">Рекомендуется</span>
                             </div>
-                            <div id="btn-choice-quiz" class="text-lg font-bold uppercase">Подобрать пару</div>
-                            <div id="txt-choice-quiz-desc" class="text-[10px] text-blue-100 opacity-80 mt-1">Пройти тест на совместимость (30 сек)</div>
+                            <div id="btn-choice-quiz" class="text-xl font-bold uppercase text-white font-heading">Подобрать пару</div>
+                            <div id="txt-choice-quiz-desc" class="text-xs text-blue-50 opacity-90 mt-1 font-medium">Пройти тест на совместимость (30 сек)</div>
                         </div>
                     </button>
 
-                    <button onclick="redirectSmartlink()" class="w-full bg-black/40 border border-gray-600 p-4 rounded-xl text-left active:bg-gray-800 transition-colors">
-                        <div id="btn-choice-skip" class="text-sm font-bold text-gray-300 uppercase">Пропустить и смотреть анкеты</div>
-                        <div class="text-[10px] text-gray-500 mt-1">Качество совпадений может быть ниже</div>
+                    <button onclick="redirectSmartlink()" class="w-full bg-white/5 hover:bg-white/10 border border-gray-500 p-4 rounded-xl text-left active:bg-gray-800 transition-colors group">
+                        <div id="btn-choice-skip" class="text-sm font-bold text-gray-100 group-hover:text-white uppercase font-heading">Пропустить и смотреть анкеты</div>
+                        <div class="text-[10px] text-gray-400 mt-1">Качество совпадений может быть ниже</div>
                     </button>
                 </div>
 
                 <!-- 3. QUIZ -->
                 <div id="view-quiz" class="hidden glass-panel p-6 rounded-2xl border-t-4 border-orange-500 fade-in relative">
-                    <div class="w-full h-1.5 progress-bar-container mb-6">
+                    <div class="w-full h-2 progress-bar-container mb-8">
                         <div id="quiz-progress" class="h-full progress-bar-fill" style="width: 33%"></div>
                     </div>
 
                     <div id="quiz-content">
-                        <h3 id="quiz-question" class="text-xl font-bold mb-6 text-center min-h-[4rem] flex items-center justify-center"></h3>
-                        <div id="quiz-options" class="flex flex-col gap-3"></div>
+                        <h3 id="quiz-question" class="text-2xl font-bold mb-8 text-center min-h-[4rem] flex items-center justify-center text-white drop-shadow-md"></h3>
+                        <div id="quiz-options" class="flex flex-col gap-4"></div>
                     </div>
                 </div>
 
                 <!-- 4. PROCESSING -->
                 <div id="view-processing" class="hidden glass-panel p-8 rounded-2xl text-center border-t-4 border-green-500 fade-in">
-                    <div class="w-16 h-16 mx-auto mb-6 relative">
+                    <div class="w-20 h-20 mx-auto mb-8 relative">
                         <div class="absolute inset-0 border-4 border-gray-600 rounded-full opacity-30"></div>
                         <div class="absolute inset-0 border-4 border-t-green-500 rounded-full animate-spin"></div>
                     </div>
-                    <div id="process-log" class="text-left text-xs font-mono text-green-400 bg-black/50 p-4 rounded-lg h-32 flex flex-col justify-end overflow-hidden mb-4 border border-green-900/50"></div>
-                    <p id="txt-analyzing" class="text-sm font-bold animate-pulse text-white">Анализ анкет...</p>
+                    <div id="process-log" class="text-left text-xs font-mono text-green-300 bg-black/60 p-4 rounded-lg h-36 flex flex-col justify-end overflow-hidden mb-6 border border-green-500/30 shadow-inner"></div>
+                    <p id="txt-analyzing" class="text-base font-bold animate-pulse text-white font-heading tracking-wide">Анализ анкет...</p>
                 </div>
 
                 <!-- 5. RESULT -->
                 <div id="view-result" class="hidden glass-panel p-6 md:p-8 rounded-2xl text-center border-t-4 border-red-600 fade-in">
-                    <div class="mb-6">
-                        <div class="inline-block px-4 py-1 rounded-full bg-green-500/20 text-green-400 text-[10px] font-bold border border-green-500/50 mb-4 animate-bounce">
+                    <div class="mb-8">
+                        <div class="inline-block px-4 py-1.5 rounded-full bg-green-500/20 text-green-300 text-xs font-bold border border-green-500/50 mb-4 animate-bounce tracking-widest uppercase">
                             <span id="txt-match-found">УСПЕХ! СОВПАДЕНИЕ НАЙДЕНО</span>
                         </div>
-                        <h2 id="txt-ready" class="text-2xl md:text-3xl font-black uppercase mb-2">Анкета Готова</h2>
-                        <p id="txt-ready-sub" class="text-gray-300 text-xs">Мы подобрали девушек по вашим параметрам.</p>
+                        <h2 id="txt-ready" class="text-3xl md:text-4xl font-black uppercase mb-2 text-white drop-shadow-lg">Анкета Готова</h2>
+                        <p id="txt-ready-sub" class="text-gray-200 text-sm font-medium">Мы подобрали девушек по вашим параметрам.</p>
                     </div>
 
-                    <div class="p-4 bg-black/40 rounded-xl mb-6 border border-gray-700">
-                        <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
-                            <span id="txt-criteria-age">Возраст:</span> <span class="text-white">OK</span>
+                    <div class="p-5 bg-black/50 rounded-xl mb-8 border border-gray-600 shadow-inner">
+                        <div class="flex items-center justify-between text-sm text-gray-300 mb-3 border-b border-gray-700 pb-2">
+                            <span id="txt-criteria-age">Возраст:</span> <span class="text-white font-bold">OK</span>
                         </div>
-                        <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
-                            <span id="txt-criteria-goal">Цель:</span> <span class="text-white">OK</span>
+                        <div class="flex items-center justify-between text-sm text-gray-300 mb-3 border-b border-gray-700 pb-2">
+                            <span id="txt-criteria-goal">Цель:</span> <span class="text-white font-bold">OK</span>
                         </div>
-                        <div class="flex items-center justify-between text-xs text-gray-400">
+                        <div class="flex items-center justify-between text-sm text-gray-300">
                             <span id="txt-criteria-loc">Локация:</span> <span class="text-green-400 font-bold">Рядом (1 км)</span>
                         </div>
                     </div>
 
-                    <button onclick="redirectSmartlink()" class="w-full bg-gradient-to-r from-green-600 to-green-500 text-white font-bold py-4 rounded-xl uppercase tracking-wider text-lg md:text-xl shadow-[0_0_20px_rgba(34,197,94,0.4)] pulse-green active:scale-95 transition-transform">
+                    <button onclick="redirectSmartlink()" class="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-bold py-5 rounded-xl uppercase tracking-wider text-xl shadow-[0_0_25px_rgba(34,197,94,0.5)] pulse-green active:scale-95 transition-transform font-heading">
                         <span id="btn-show">Показать Партнера</span>
                     </button>
                 </div>
@@ -308,22 +334,22 @@
 
             <!-- RIGHT COLUMN: CHAT -->
             <div id="live-chat" class="hidden md:flex glass-panel w-80 rounded-2xl fade-in z-10 border-r-4 border-r-green-500/50 flex-shrink-0 h-[500px] flex-col">
-                <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/20 rounded-t-2xl">
+                <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/40 rounded-t-2xl">
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full bg-green-500 online-dot"></div>
-                        <span id="txt-chat-title" class="text-sm font-bold tracking-wide">LIVE ONLINE</span>
+                        <span id="txt-chat-title" class="text-sm font-bold tracking-wide font-heading text-white">LIVE ONLINE</span>
                     </div>
-                    <span class="text-xs text-gray-400 bg-white/10 px-2 py-0.5 rounded-full">4,209</span>
+                    <span class="text-xs text-gray-300 bg-white/10 px-2 py-0.5 rounded-full border border-white/5">4,209</span>
                 </div>
 
-                <div class="chat-scroll-container p-2 relative flex-grow">
-                    <div id="chat-track" class="flex flex-col justify-end gap-2 pb-2"></div>
+                <div class="chat-scroll-container p-3 relative flex-grow bg-gradient-to-b from-transparent to-black/20">
+                    <div id="chat-track" class="flex flex-col justify-end gap-3 pb-2"></div>
                 </div>
                 
-                <div class="p-3 border-t border-white/10 bg-black/20 rounded-b-2xl relative">
+                <div class="p-4 border-t border-white/10 bg-black/40 rounded-b-2xl relative">
                     <div id="chat-toast" class="chat-toast"><span id="txt-chat-alert">Подтвердите возраст!</span></div>
-                    <div onclick="tryChat()" class="h-8 bg-white/5 rounded-full border border-white/10 flex items-center px-3 cursor-pointer hover:bg-white/10">
-                        <span id="txt-chat-placeholder" class="text-[10px] text-gray-500 italic">Написать...</span>
+                    <div onclick="tryChat()" class="h-10 bg-white/5 rounded-full border border-white/10 flex items-center px-4 cursor-pointer hover:bg-white/10 transition-colors">
+                        <span id="txt-chat-placeholder" class="text-xs text-gray-300 italic">Написать...</span>
                     </div>
                 </div>
             </div>
@@ -335,11 +361,48 @@
         const SMARTLINK_URL = "https://tone.affomelody.com/click?pid=40187&offer_id=25";
         const FALLBACK_URL = "https://t.me/the_serp_real";
 
-        var currentLang = 'en'; // Default to EN initially
+        var currentLang = 'en'; // Default to EN
         var quizStep = 0;
 
-        // --- TRANSLATIONS ---
+        // --- TRANSLATIONS (Expanded for all requested languages) ---
         const translations = {
+            // ENGLISH (Default)
+            en: {
+                title: 'Adults <span class="text-red-500">Only</span>',
+                subtitle: 'This site contains 18+ material.<br>Do you confirm your age?',
+                btnYes: 'Yes, I am 18+',
+                btnNo: 'No, Exit',
+                choiceTitle: 'Choose Path',
+                choiceSub: 'How do you want to proceed?',
+                rec: 'Recommended',
+                btnChoiceQuiz: 'Find a Match',
+                btnChoiceQuizDesc: 'Take compatibility quiz (30s)',
+                btnChoiceSkip: 'Skip to Photos',
+                q1: 'Your Age?',
+                q1_opt1: '18 - 25 years',
+                q1_opt2: '25 - 40 years',
+                q1_opt3: '40+ years',
+                q2: 'Your Goal?',
+                q2_opt1: 'Serious Relationship',
+                q2_opt2: 'Just Chatting',
+                q2_opt3: 'Fun / Casual / Sex',
+                q3: 'Looks Matter?',
+                q3_opt1: 'Yes, very much',
+                q3_opt2: 'No, vibe is key',
+                analyzing: 'Analyzing compatibility...',
+                logs: ['Connecting to DB...', 'Filtering bots...', 'Checking geolocation...', 'Matching profiles...', 'Done!'],
+                matchFound: 'SUCCESS! MATCH FOUND',
+                ready: 'Profile Ready',
+                readySub: 'We found girls matching your preferences.',
+                critAge: 'Age:',
+                critGoal: 'Goal:',
+                critLoc: 'Location:',
+                btnShow: 'Show Partner',
+                chatTitle: 'LIVE NOW',
+                chatPlaceholder: 'Login to reply...',
+                chatAlert: 'Verify age first!'
+            },
+            // RUSSIAN
             ru: {
                 title: 'Только <span class="text-red-500">Взрослые</span>',
                 subtitle: 'Этот сайт содержит материалы 18+.<br>Вы подтверждаете свой возраст?',
@@ -375,77 +438,450 @@
                 chatPlaceholder: 'Войдите, чтобы ответить...',
                 chatAlert: 'Сначала пройдите проверку!'
             },
-            en: {
-                title: 'Adults <span class="text-red-500">Only</span>',
-                subtitle: 'This site contains 18+ material.<br>Do you confirm your age?',
-                btnYes: 'Yes, I am 18+',
-                btnNo: 'No, Exit',
-                choiceTitle: 'Choose Path',
-                choiceSub: 'How do you want to proceed?',
-                rec: 'Recommended',
-                btnChoiceQuiz: 'Find a Match',
-                btnChoiceQuizDesc: 'Take compatibility quiz (30s)',
-                btnChoiceSkip: 'Skip to Photos',
-                q1: 'Your Age?',
-                q1_opt1: '18 - 25 years',
-                q1_opt2: '25 - 40 years',
-                q1_opt3: '40+ years',
-                q2: 'Your Goal?',
-                q2_opt1: 'Serious Relationship',
-                q2_opt2: 'Just Chatting',
-                q2_opt3: 'Fun / Casual / Sex',
-                q3: 'Looks Matter?',
-                q3_opt1: 'Yes, very much',
-                q3_opt2: 'No, vibe is key',
-                analyzing: 'Analyzing compatibility...',
-                logs: ['Connecting to DB...', 'Filtering bots...', 'Checking geolocation...', 'Matching profiles...', 'Done!'],
-                matchFound: 'SUCCESS! MATCH FOUND',
-                ready: 'Profile Ready',
-                readySub: 'We found girls matching your preferences.',
-                critAge: 'Age:',
-                critGoal: 'Goal:',
-                critLoc: 'Location:',
-                btnShow: 'Show Partner',
-                chatTitle: 'LIVE NOW',
-                chatPlaceholder: 'Login to reply...',
-                chatAlert: 'Verify age first!'
+            // UKRAINIAN
+            ua: {
+                title: 'Тільки <span class="text-red-500">Дорослі</span>',
+                subtitle: 'Цей сайт містить матеріали 18+.<br>Ви підтверджуєте свій вік?',
+                btnYes: 'Так, мені є 18',
+                btnNo: 'Ні, вихід',
+                choiceTitle: 'Оберіть шлях',
+                choiceSub: 'Як ви хочете продовжити?',
+                rec: 'Рекомендовано',
+                btnChoiceQuiz: 'Знайти пару',
+                btnChoiceQuizDesc: 'Тест на сумісність (30 сек)',
+                btnChoiceSkip: 'Пропустити і дивитися фото',
+                q1: 'Ваш вік?',
+                q1_opt1: '18 - 25 років',
+                q1_opt2: '25 - 40 років',
+                q1_opt3: '40+ років',
+                q2: 'Ваша мета?',
+                q2_opt1: 'Серйозні стосунки',
+                q2_opt2: 'Просто спілкування',
+                q2_opt3: 'Секс / Розваги',
+                q3: 'Важлива зовнішність?',
+                q3_opt1: 'Так, дуже',
+                q3_opt2: 'Ні, головне харизма',
+                analyzing: 'Аналіз сумісності...',
+                logs: ['Підключення до бази...', 'Фільтрація ботів...', 'Аналіз геолокації...', 'Підбір кандидатів...', 'Готово!'],
+                matchFound: 'УСПІХ! ЗНАЙДЕНО ПАРУ',
+                ready: 'Анкета Готова',
+                readySub: 'Ми підібрали дівчат за вашими параметрами.',
+                critAge: 'Вік:',
+                critGoal: 'Мета:',
+                critLoc: 'Локація:',
+                btnShow: 'Показати Партнера',
+                chatTitle: 'LIVE ЗАРАЗ',
+                chatPlaceholder: 'Увійдіть, щоб відповісти...',
+                chatAlert: 'Спочатку пройдіть перевірку!'
+            },
+            // KAZAKH
+            kz: {
+                title: 'Тек <span class="text-red-500">Ересектер</span>',
+                subtitle: 'Бұл сайтта 18+ материалдар бар.<br>Жасыңызды растайсыз ба?',
+                btnYes: 'Иә, 18-демін',
+                btnNo: 'Жоқ, шығу',
+                choiceTitle: 'Жолды таңдаңыз',
+                choiceSub: 'Қалай жалғастырғыңыз келеді?',
+                rec: 'Ұсынылады',
+                btnChoiceQuiz: 'Жұп табу',
+                btnChoiceQuizDesc: 'Сәйкестік сынағы (30 сек)',
+                btnChoiceSkip: 'Өткізіп жіберу',
+                q1: 'Сіздің жасыңыз?',
+                q1_opt1: '18 - 25 жас',
+                q1_opt2: '25 - 40 жас',
+                q1_opt3: '40+ жас',
+                q2: 'Мақсатыңыз?',
+                q2_opt1: 'Салмақты қарым-қатынас',
+                q2_opt2: 'Әңгімелесу',
+                q2_opt3: 'Көңіл көтеру / Секс',
+                q3: 'Сыртқы келбет маңызды ма?',
+                q3_opt1: 'Иә, өте маңызды',
+                q3_opt2: 'Жоқ',
+                analyzing: 'Талдау...',
+                logs: ['Байланысуда...', 'Боттарды сүзу...', 'Локацияны тексеру...', 'Іздеу...', 'Дайын!'],
+                matchFound: 'СӘЙКЕСТІК ТАБЫЛДЫ',
+                ready: 'Анкета Дайын',
+                readySub: 'Біз сізге сәйкес қыздарды таптық.',
+                critAge: 'Жас:',
+                critGoal: 'Мақсат:',
+                critLoc: 'Локация:',
+                btnShow: 'Серіктесті Көрсету',
+                chatTitle: 'ТІКЕЛЕЙ ЭФИР',
+                chatPlaceholder: 'Жауап беру үшін кіріңіз...',
+                chatAlert: 'Алдымен жасыңызды растаңыз!'
+            },
+            // AZERBAIJANI
+            az: {
+                title: 'Yalnız <span class="text-red-500">Böyüklər</span>',
+                subtitle: 'Bu saytda 18+ material var.<br>Yaşınızı təsdiqləyirsiniz?',
+                btnYes: 'Bəli, 18 yaşım var',
+                btnNo: 'Xeyr, çıxış',
+                choiceTitle: 'Seçim edin',
+                choiceSub: 'Necə davam etmək istəyirsiniz?',
+                rec: 'Məsləhət görülür',
+                btnChoiceQuiz: 'Tərəfdaş tapın',
+                btnChoiceQuizDesc: 'Uyğunluq testi (30 saniyə)',
+                btnChoiceSkip: 'Keçmək',
+                q1: 'Yaşınız?',
+                q1_opt1: '18 - 25 yaş',
+                q1_opt2: '25 - 40 yaş',
+                q1_opt3: '40+ yaş',
+                q2: 'Məqsədiniz?',
+                q2_opt1: 'Ciddi münasibət',
+                q2_opt2: 'Sadəcə söhbət',
+                q2_opt3: 'Əyləncə / Seks',
+                q3: 'Görünüş vacibdirmi?',
+                q3_opt1: 'Bəli, çox',
+                q3_opt2: 'Xeyr',
+                analyzing: 'Analiz edilir...',
+                logs: ['Qoşulur...', 'Botlar təmizlənir...', 'Məkan yoxlanılır...', 'Axtarış...', 'Hazırdır!'],
+                matchFound: 'UĞUR! TAPILDI',
+                ready: 'Profil Hazırdır',
+                readySub: 'Sizin üçün qızlar tapdıq.',
+                critAge: 'Yaş:',
+                critGoal: 'Məqsəd:',
+                critLoc: 'Məkan:',
+                btnShow: 'Tərəfdaşı Göstər',
+                chatTitle: 'CANLI',
+                chatPlaceholder: 'Cavab vermək üçün daxil olun...',
+                chatAlert: 'Əvvəlcə yaşınızı təsdiqləyin!'
+            },
+            // ROMANIAN (Moldova)
+            ro: {
+                title: 'Doar <span class="text-red-500">Adulți</span>',
+                subtitle: 'Acest site conține materiale 18+.<br>Confirmați vârsta?',
+                btnYes: 'Da, am 18+',
+                btnNo: 'Nu, Ieșire',
+                choiceTitle: 'Alege calea',
+                choiceSub: 'Cum doriți să continuați?',
+                rec: 'Recomandat',
+                btnChoiceQuiz: 'Găsește partener',
+                btnChoiceQuizDesc: 'Test de compatibilitate (30s)',
+                btnChoiceSkip: 'Sari peste',
+                q1: 'Vârsta ta?',
+                q1_opt1: '18 - 25 ani',
+                q1_opt2: '25 - 40 ani',
+                q1_opt3: '40+ ani',
+                q2: 'Scopul tău?',
+                q2_opt1: 'Relație serioasă',
+                q2_opt2: 'Doar chat',
+                q2_opt3: 'Distracție / Sex',
+                q3: 'Aspectul contează?',
+                q3_opt1: 'Da, foarte mult',
+                q3_opt2: 'Nu',
+                analyzing: 'Se analizează...',
+                logs: ['Conectare...', 'Filtrare boți...', 'Geolocație...', 'Căutare...', 'Gata!'],
+                matchFound: 'SUCCES! AM GĂSIT',
+                ready: 'Profil Pregătit',
+                readySub: 'Am găsit fete conform preferințelor.',
+                critAge: 'Vârstă:',
+                critGoal: 'Scop:',
+                critLoc: 'Locație:',
+                btnShow: 'Arată Partenerul',
+                chatTitle: 'LIVE ACUM',
+                chatPlaceholder: 'Logare pentru a răspunde...',
+                chatAlert: 'Verifică vârsta mai întâi!'
+            },
+            // TURKMEN
+            tk: {
+                title: 'Diňe <span class="text-red-500">Ulylar</span>',
+                subtitle: 'Bu saýtda 18+ material bar.<br>Ýaşyňyzy tassyklaýarsyňyzmy?',
+                btnYes: 'Hawa, 18 ýaşymda',
+                btnNo: 'Ýok, çykmak',
+                choiceTitle: 'Ýol saýla',
+                choiceSub: 'Nähili dowam etdirmek isleýärsiňiz?',
+                rec: 'Maslahat berilýär',
+                btnChoiceQuiz: 'Jübüt tap',
+                btnChoiceQuizDesc: 'Sygymlylyk synagy (30 sek)',
+                btnChoiceSkip: 'Geçmek',
+                q1: 'Ýaşyňyz?',
+                q1_opt1: '18 - 25 ýaş',
+                q1_opt2: '25 - 40 ýaş',
+                q1_opt3: '40+ ýaş',
+                q2: 'Maksadyňyz?',
+                q2_opt1: 'Çynlakaý gatnaşyk',
+                q2_opt2: 'Diňe gürrüňdeşlik',
+                q2_opt3: 'Lezzet / Seks',
+                q3: 'Daşky görnüş möhümmi?',
+                q3_opt1: 'Hawa, örän',
+                q3_opt2: 'Ýok',
+                analyzing: 'Derňelýär...',
+                logs: ['Birikdirilýär...', 'Botlar aýrylýar...', 'Ýerleşiş...', 'Gözlenýär...', 'Taýyn!'],
+                matchFound: 'ÜSTÜNLIK! TAPYLDY',
+                ready: 'Anketa Taýyn',
+                readySub: 'Siziň islegiňize görä gyz tapdyk.',
+                critAge: 'Ýaş:',
+                critGoal: 'Maksat:',
+                critLoc: 'Ýer:',
+                btnShow: 'Görkez',
+                chatTitle: 'GÖNI ÝAÝLYM',
+                chatPlaceholder: 'Jogap bermek üçin giriň...',
+                chatAlert: 'Ilki ýaşyňyzy tassyklaň!'
+            },
+            // GERMAN
+            de: {
+                title: 'Nur <span class="text-red-500">Erwachsene</span>',
+                subtitle: 'Diese Seite ist ab 18 Jahren.<br>Bestätigen Sie Ihr Alter?',
+                btnYes: 'Ja, ich bin 18+',
+                btnNo: 'Nein, Raus',
+                choiceTitle: 'Wähle den Weg',
+                choiceSub: 'Wie möchtest du fortfahren?',
+                rec: 'Empfohlen',
+                btnChoiceQuiz: 'Partner finden',
+                btnChoiceQuizDesc: 'Kompatibilitätstest (30s)',
+                btnChoiceSkip: 'Direkt zu Fotos',
+                q1: 'Dein Alter?',
+                q1_opt1: '18 - 25',
+                q1_opt2: '25 - 40',
+                q1_opt3: '40+',
+                q2: 'Dein Ziel?',
+                q2_opt1: 'Beziehung',
+                q2_opt2: 'Chatten',
+                q2_opt3: 'Spaß / Sex',
+                q3: 'Aussehen wichtig?',
+                q3_opt1: 'Ja, sehr',
+                q3_opt2: 'Nein',
+                analyzing: 'Analysiere Daten...',
+                logs: ['Verbinde...', 'Bot-Filter...', 'Standort...', 'Suche...', 'Fertig!'],
+                matchFound: 'TREFFER GEFUNDEN',
+                ready: 'Profil Bereit',
+                readySub: 'Wir haben passende Frauen gefunden.',
+                critAge: 'Alter:',
+                critGoal: 'Ziel:',
+                critLoc: 'Ort:',
+                btnShow: 'Partner Anzeigen',
+                chatTitle: 'JETZT LIVE',
+                chatPlaceholder: 'Einloggen...',
+                chatAlert: 'Alter erst bestätigen!'
+            },
+            // FRENCH
+            fr: {
+                title: 'Adultes <span class="text-red-500">Seulement</span>',
+                subtitle: 'Êtes-vous majeur?',
+                btnYes: 'Oui, j\'ai 18+',
+                btnNo: 'Non, Sortie',
+                choiceTitle: 'Choisissez',
+                choiceSub: 'Comment continuer?',
+                rec: 'Recommandé',
+                btnChoiceQuiz: 'Trouver un partenaire',
+                btnChoiceQuizDesc: 'Quiz de compatibilité (30s)',
+                btnChoiceSkip: 'Passer',
+                q1: 'Votre âge?',
+                q1_opt1: '18 - 25',
+                q1_opt2: '25 - 40',
+                q1_opt3: '40+',
+                q2: 'Votre but?',
+                q2_opt1: 'Sérieux',
+                q2_opt2: 'Discuter',
+                q2_opt3: 'Fun / Sexe',
+                q3: 'Physique important?',
+                q3_opt1: 'Oui, très',
+                q3_opt2: 'Non',
+                analyzing: 'Analyse...',
+                logs: ['Connexion...', 'Filtre...', 'Lieu...', 'Recherche...', 'Prêt!'],
+                matchFound: 'SUCCÈS ! TROUVÉ',
+                ready: 'Profil Prêt',
+                readySub: 'Nous avons trouvé des profils.',
+                critAge: 'Âge:',
+                critGoal: 'But:',
+                critLoc: 'Lieu:',
+                btnShow: 'Voir le profil',
+                chatTitle: 'EN DIRECT',
+                chatPlaceholder: 'Connectez-vous...',
+                chatAlert: 'Vérifiez votre âge!'
+            },
+            // ITALIAN
+            it: {
+                title: 'Solo <span class="text-red-500">Adulti</span>',
+                subtitle: 'Sei maggiorenne?',
+                btnYes: 'Sì, ho 18+',
+                btnNo: 'No, Esci',
+                choiceTitle: 'Scegli',
+                choiceSub: 'Come vuoi procedere?',
+                rec: 'Consigliato',
+                btnChoiceQuiz: 'Trova Partner',
+                btnChoiceQuizDesc: 'Quiz compatibilità (30s)',
+                btnChoiceSkip: 'Salta',
+                q1: 'La tua età?',
+                q1_opt1: '18 - 25',
+                q1_opt2: '25 - 40',
+                q1_opt3: '40+',
+                q2: 'Il tuo obiettivo?',
+                q2_opt1: 'Serio',
+                q2_opt2: 'Chat',
+                q2_opt3: 'Divertimento / Sesso',
+                q3: 'Aspetto importante?',
+                q3_opt1: 'Sì, molto',
+                q3_opt2: 'No',
+                analyzing: 'Analisi...',
+                logs: ['Connessione...', 'Filtro...', 'Posizione...', 'Ricerca...', 'Fatto!'],
+                matchFound: 'SUCCESSO!',
+                ready: 'Profilo Pronto',
+                readySub: 'Abbiamo trovato ragazze per te.',
+                critAge: 'Età:',
+                critGoal: 'Obiettivo:',
+                critLoc: 'Posizione:',
+                btnShow: 'Mostra Partner',
+                chatTitle: 'IN DIRETTA',
+                chatPlaceholder: 'Accedi...',
+                chatAlert: 'Verifica età!'
+            },
+            // SPANISH
+            es: {
+                title: 'Solo <span class="text-red-500">Adultos</span>',
+                subtitle: '¿Eres mayor de edad?',
+                btnYes: 'Sí, tengo 18+',
+                btnNo: 'No, Salir',
+                choiceTitle: 'Elige',
+                choiceSub: '¿Cómo quieres seguir?',
+                rec: 'Recomendado',
+                btnChoiceQuiz: 'Buscar Pareja',
+                btnChoiceQuizDesc: 'Test de compatibilidad (30s)',
+                btnChoiceSkip: 'Saltar',
+                q1: '¿Tu edad?',
+                q1_opt1: '18 - 25',
+                q1_opt2: '25 - 40',
+                q1_opt3: '40+',
+                q2: '¿Tu objetivo?',
+                q2_opt1: 'Serio',
+                q2_opt2: 'Chat',
+                q2_opt3: 'Diversión / Sexo',
+                q3: '¿Importa el físico?',
+                q3_opt1: 'Sí, mucho',
+                q3_opt2: 'No',
+                analyzing: 'Analizando...',
+                logs: ['Conectando...', 'Filtro...', 'Ubicación...', 'Buscando...', '¡Listo!'],
+                matchFound: '¡ÉXITO!',
+                ready: 'Perfil Listo',
+                readySub: 'Encontramos chicas para ti.',
+                critAge: 'Edad:',
+                critGoal: 'Meta:',
+                critLoc: 'Ubicación:',
+                btnShow: 'Ver Pareja',
+                chatTitle: 'EN VIVO',
+                chatPlaceholder: 'Ingresa...',
+                chatAlert: '¡Verifica tu edad!'
+            },
+            // POLISH
+            pl: {
+                title: 'Tylko <span class="text-red-500">Dorośli</span>',
+                subtitle: 'Potwierdź swój wiek.',
+                btnYes: 'Tak, mam 18+',
+                btnNo: 'Nie',
+                choiceTitle: 'Wybierz',
+                choiceSub: 'Jak chcesz kontynuować?',
+                rec: 'Zalecane',
+                btnChoiceQuiz: 'Znajdź Parę',
+                btnChoiceQuizDesc: 'Test dopasowania (30s)',
+                btnChoiceSkip: 'Pomiń',
+                q1: 'Twój wiek?',
+                q1_opt1: '18 - 25',
+                q1_opt2: '25 - 40',
+                q1_opt3: '40+',
+                q2: 'Twój cel?',
+                q2_opt1: 'Poważny',
+                q2_opt2: 'Czat',
+                q2_opt3: 'Zabawa / Seks',
+                q3: 'Wygląd ważny?',
+                q3_opt1: 'Tak, bardzo',
+                q3_opt2: 'Nie',
+                analyzing: 'Analiza...',
+                logs: ['Łączenie...', 'Filtr...', 'Lokalizacja...', 'Szukanie...', 'Gotowe!'],
+                matchFound: 'SUKCES!',
+                ready: 'Profil Gotowy',
+                readySub: 'Znaleźliśmy dziewczyny.',
+                critAge: 'Wiek:',
+                critGoal: 'Cel:',
+                critLoc: 'Lokalizacja:',
+                btnShow: 'Pokaż Partnera',
+                chatTitle: 'NA ŻYWO',
+                chatPlaceholder: 'Zaloguj się...',
+                chatAlert: 'Potwierdź wiek!'
+            },
+            // DUTCH
+            nl: {
+                title: 'Alleen <span class="text-red-500">Volwassenen</span>',
+                subtitle: 'Bevestig je leeftijd.',
+                btnYes: 'Ja, ik ben 18+',
+                btnNo: 'Nee',
+                choiceTitle: 'Kies',
+                choiceSub: 'Hoe verder?',
+                rec: 'Aanbevolen',
+                btnChoiceQuiz: 'Vind Partner',
+                btnChoiceQuizDesc: 'Quiz (30s)',
+                btnChoiceSkip: 'Overslaan',
+                q1: 'Leeftijd?',
+                q1_opt1: '18 - 25',
+                q1_opt2: '25 - 40',
+                q1_opt3: '40+',
+                q2: 'Doel?',
+                q2_opt1: 'Serieus',
+                q2_opt2: 'Chat',
+                q2_opt3: 'Plezier / Sex',
+                q3: 'Uiterlijk belangrijk?',
+                q3_opt1: 'Ja, erg',
+                q3_opt2: 'Nee',
+                analyzing: 'Analyseren...',
+                logs: ['Verbinden...', 'Filter...', 'Locatie...', 'Zoeken...', 'Klaar!'],
+                matchFound: 'SUCCES!',
+                ready: 'Profiel Klaar',
+                readySub: 'We hebben meisjes gevonden.',
+                critAge: 'Leeftijd:',
+                critGoal: 'Doel:',
+                critLoc: 'Locatie:',
+                btnShow: 'Toon Partner',
+                chatTitle: 'LIVE NU',
+                chatPlaceholder: 'Inloggen...',
+                chatAlert: 'Bevestig leeftijd!'
+            },
+            // SWEDISH
+            sv: {
+                title: 'Endast <span class="text-red-500">Vuxna</span>',
+                subtitle: 'Bekräfta din ålder.',
+                btnYes: 'Ja, jag är 18+',
+                btnNo: 'Nej',
+                choiceTitle: 'Välj',
+                choiceSub: 'Hur vill du fortsätta?',
+                rec: 'Rekommenderas',
+                btnChoiceQuiz: 'Hitta Partner',
+                btnChoiceQuizDesc: 'Quiz (30s)',
+                btnChoiceSkip: 'Hoppa över',
+                q1: 'Ålder?',
+                q1_opt1: '18 - 25',
+                q1_opt2: '25 - 40',
+                q1_opt3: '40+',
+                q2: 'Mål?',
+                q2_opt1: 'Seriöst',
+                q2_opt2: 'Chatt',
+                q2_opt3: 'Kul / Sex',
+                q3: 'Utseende viktigt?',
+                q3_opt1: 'Ja, mycket',
+                q3_opt2: 'Nej',
+                analyzing: 'Analyserar...',
+                logs: ['Ansluter...', 'Filter...', 'Plats...', 'Söker...', 'Klart!'],
+                matchFound: 'LYCKAT!',
+                ready: 'Profil Redo',
+                readySub: 'Vi hittade tjejer.',
+                critAge: 'Ålder:',
+                critGoal: 'Mål:',
+                critLoc: 'Plats:',
+                btnShow: 'Visa Partner',
+                chatTitle: 'LIVE NU',
+                chatPlaceholder: 'Logga in...',
+                chatAlert: 'Bekräfta ålder!'
             }
         };
-
-        // Populate other languages with English as fallback base
-        ['de', 'fr', 'it', 'nl', 'pl', 'es', 'sv'].forEach(l => translations[l] = {...translations.en});
-        
-        // Simple manual overrides for key UI elements to make flags feel real
-        // German
-        translations.de.title = 'Nur <span class="text-red-500">Erwachsene</span>';
-        translations.de.subtitle = 'Diese Seite ist ab 18 Jahren.<br>Bestätigen Sie Ihr Alter?';
-        translations.de.btnYes = 'Ja, ich bin 18+';
-        translations.de.btnNo = 'Nein, Raus';
-        translations.de.matchFound = 'TREFFER GEFUNDEN';
-        
-        // French
-        translations.fr.title = 'Adultes <span class="text-red-500">Seulement</span>';
-        translations.fr.subtitle = 'Êtes-vous majeur?';
-        translations.fr.btnYes = 'Oui, j\'ai 18+';
-        translations.fr.btnNo = 'Non, Sortie';
-        
-        // Spanish
-        translations.es.title = 'Solo <span class="text-red-500">Adultos</span>';
-        translations.es.btnYes = 'Sí, tengo 18+';
-        translations.es.btnNo = 'No, Salir';
 
         /* --- LOGIC FLOW --- */
         function setLang(lang) {
             currentLang = lang;
             
-            // Highlight active button in the new bar
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
             const activeBtn = document.getElementById(`lang-btn-${lang}`);
             if(activeBtn) activeBtn.classList.add('active');
 
             const dict = translations[lang] || translations.en;
             
-            // Helper function
             const setText = (id, text) => {
                 const el = document.getElementById(id);
                 if(el) el.innerHTML = text;
@@ -479,39 +915,40 @@
 
             if(quizStep > 0 && quizStep <= 3) renderQuizStep(quizStep);
             
-            // Restart chat
             document.getElementById('chat-track').innerHTML = ''; 
             startChat();
         }
 
-        // --- GEO IP DETECTION ---
+        // --- GEO IP DETECTION (Updated with CIS) ---
         function autoDetectLanguage() {
-            // Using a free IP API to get country code
             fetch('https://get.geojs.io/v1/ip/country.json')
                 .then(response => response.json())
                 .then(data => {
                     const country = data.country ? data.country.toLowerCase() : 'us';
                     console.log('Detected Country:', country);
                     
-                    // Map country codes to our supported languages
                     const langMap = {
-                        'ru': 'ru', 'ua': 'ru', 'by': 'ru', 'kz': 'ru', // Russian speaking
-                        'de': 'de', 'at': 'de', 'ch': 'de', // German speaking
-                        'fr': 'fr', 'be': 'fr', // French
+                        'ru': 'ru', 'by': 'ru', 
+                        'ua': 'ua', 
+                        'kz': 'kz',
+                        'az': 'az',
+                        'md': 'ro', // Moldova -> Romanian/Russian (using RO as per flag)
+                        'tm': 'tk', // Turkmenistan
+                        'de': 'de', 'at': 'de', 'ch': 'de',
+                        'fr': 'fr', 'be': 'fr',
                         'it': 'it',
-                        'es': 'es', 'mx': 'es', 'ar': 'es', // Spanish
+                        'es': 'es', 'mx': 'es', 'ar': 'es',
                         'pl': 'pl',
                         'nl': 'nl',
-                        'se': 'sv' // Sweden -> Swedish
+                        'se': 'sv'
                     };
 
-                    // Default to EN if not in map
                     const detectedLang = langMap[country] || 'en';
                     setLang(detectedLang);
                 })
                 .catch(err => {
                     console.error('GeoIP Error:', err);
-                    setLang('en'); // Fallback
+                    setLang('en');
                 });
         }
 
@@ -557,7 +994,7 @@
 
             options.forEach((opt) => {
                 const btn = document.createElement('button');
-                btn.className = "w-full bg-white/10 hover:bg-white/20 border border-white/10 p-4 rounded-xl text-left text-sm font-bold text-white transition-colors flex items-center justify-between group active:scale-95";
+                btn.className = "w-full bg-white/10 hover:bg-white/20 border border-white/20 p-4 rounded-xl text-left text-sm font-bold text-white transition-colors flex items-center justify-between group active:scale-95 shadow-md";
                 btn.innerHTML = `<span>${opt}</span> <div class="w-4 h-4 rounded-full border border-gray-400 group-hover:bg-red-500 group-hover:border-red-500 transition-colors"></div>`;
                 btn.onclick = () => nextStep();
                 optsEl.appendChild(btn);
@@ -587,7 +1024,7 @@
                     return;
                 }
                 const div = document.createElement('div');
-                div.className = 'processing-item active text-[10px] md:text-xs mb-1';
+                div.className = 'processing-item active text-[10px] md:text-xs mb-1 font-mono';
                 div.innerText = `> ${logs[i]}`;
                 logContainer.appendChild(div);
                 if(i > 0) logContainer.children[i-1].classList.add('done');
@@ -612,7 +1049,13 @@
         const chatNames = ["Alice", "Elena", "Katy", "Masha", "Vika", "Anna"];
         const chatMsgs = {
             ru: ["Привет!", "Кто тут?", "Скучно...", "Ищу парня", "Есть кто 30+?"],
-            en: ["Hi!", "Anyone here?", "So bored...", "Looking for fun", "Hey guys"]
+            en: ["Hi!", "Anyone here?", "So bored...", "Looking for fun", "Hey guys"],
+            // Добавим пару базовых фраз для новых языков
+            ua: ["Привіт!", "Хто тут?", "Нудно...", "Шукаю хлопця", "Є хто 30+?"],
+            kz: ["Сәлем!", "Кім бар?", "Ішім пысты...", "Жігіт іздеймін", "30+ кім бар?"],
+            az: ["Salam!", "Kimsə var?", "Darıxıram...", "Oğlan axtarıram", "30+ kimsə var?"],
+            ro: ["Salut!", "E cineva?", "Mă plictisesc...", "Caut iubit", "Cineva 30+?"],
+            tk: ["Salam!", "Kim bar?", "Içim gysýar...", "Ýigit gözleýärin", "30+ kim bar?"]
         };
 
         var chatTimeout;
@@ -633,6 +1076,7 @@
         }
 
         function addMsg(animate) {
+            // Фолбек на английский, если для языка нет чата
             const msgs = (chatMsgs[currentLang] || chatMsgs.en);
             const msg = msgs[Math.floor(Math.random() * msgs.length)];
             const name = chatNames[Math.floor(Math.random() * chatNames.length)];
@@ -640,7 +1084,7 @@
             const avatarUrl = `https://randomuser.me/api/portraits/women/${avatarId}.jpg`;
             
             const div = document.createElement('div');
-            div.className = `chat-message flex items-center gap-3 p-2 rounded-lg cursor-default ${animate ? 'chat-message-new' : ''} bg-white/5 mb-2`;
+            div.className = `chat-message flex items-center gap-3 p-2 rounded-lg cursor-default ${animate ? 'chat-message-new' : ''} bg-black/40 border border-white/5 mb-2 hover:bg-black/60 transition-colors`;
             
             div.innerHTML = `
                 <div class="relative flex-shrink-0">
@@ -648,8 +1092,8 @@
                     <div class="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-black"></div>
                 </div>
                 <div class="flex flex-col overflow-hidden">
-                    <span class="text-[10px] font-bold text-red-400">${name}</span>
-                    <span class="text-[10px] text-gray-200 truncate">${msg}</span>
+                    <span class="text-[10px] font-bold text-red-400 font-heading tracking-wide">${name}</span>
+                    <span class="text-[10px] text-gray-100 truncate">${msg}</span>
                 </div>
             `;
             const track = document.getElementById('chat-track');
@@ -664,7 +1108,6 @@
         }
 
         window.onload = function() {
-            // Start with animation then detect real lang
             setLang('en'); 
             autoDetectLanguage();
         }
