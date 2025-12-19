@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dating Quiz 18+</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Добавлены шрифты Oswald (для стиля) и Roboto (для читаемости) -->
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         /* --- CORE STYLES --- */
@@ -78,13 +77,8 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         /* --- UI HELPERS --- */
-        button {
-            cursor: pointer;
-            touch-action: manipulation;
-        }
-        button:active {
-            transform: scale(0.98);
-        }
+        button { cursor: pointer; touch-action: manipulation; }
+        button:active { transform: scale(0.98); }
 
         .progress-bar-container {
             background: rgba(255,255,255,0.15);
@@ -120,6 +114,21 @@
             from { opacity: 0; transform: translateY(30px) scale(0.95); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
+        
+        /* Стили для забаненного сообщения */
+        .banned-msg {
+            background-color: rgba(220, 38, 38, 0.2) !important;
+            border: 1px solid rgba(220, 38, 38, 0.5) !important;
+            color: #fca5a5 !important;
+            font-style: italic;
+            transition: all 0.5s;
+        }
+        .fade-out-msg {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.5s;
+        }
+
         .online-dot {
             box-shadow: 0 0 5px #22c55e;
             animation: pulse-green-dot 2s infinite;
@@ -151,7 +160,12 @@
         .chat-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
-<body>
+<body onclick="enableMusic()">
+
+    <!-- AUDIO PLAYER -->
+    <audio id="bg-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
 
     <!-- VIDEO BACKGROUND -->
     <div class="fixed inset-0 overflow-hidden z-0 bg-black pointer-events-none">
@@ -171,8 +185,20 @@
                     <span class="text-xl">🇺🇸</span>
                     <span class="text-[10px] font-bold text-white tracking-wider font-heading">EN</span>
                 </button>
+                <button onclick="setLang('en')" id="lang-btn-gb" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇬🇧</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">UK</span>
+                </button>
+                <button onclick="setLang('en')" id="lang-btn-au" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇦🇺</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">AU</span>
+                </button>
+                <button onclick="setLang('en')" id="lang-btn-ca" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇨🇦</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">CA</span>
+                </button>
                 
-                <!-- CIS / Eastern Europe -->
+                <!-- CIS -->
                 <button onclick="setLang('ru')" id="lang-btn-ru" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
                     <span class="text-xl">🇷🇺</span>
                     <span class="text-[10px] font-bold text-white tracking-wider font-heading">RU</span>
@@ -203,9 +229,21 @@
                     <span class="text-xl">🇩🇪</span>
                     <span class="text-[10px] font-bold text-white tracking-wider font-heading">DE</span>
                 </button>
+                <button onclick="setLang('de')" id="lang-btn-at" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇦🇹</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">AT</span>
+                </button>
+                <button onclick="setLang('de')" id="lang-btn-ch" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇨🇭</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">CH</span>
+                </button>
                 <button onclick="setLang('fr')" id="lang-btn-fr" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
                     <span class="text-xl">🇫🇷</span>
                     <span class="text-[10px] font-bold text-white tracking-wider font-heading">FR</span>
+                </button>
+                <button onclick="setLang('fr')" id="lang-btn-be" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇧🇪</span>
+                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">BE</span>
                 </button>
                 <button onclick="setLang('it')" id="lang-btn-it" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
                     <span class="text-xl">🇮🇹</span>
@@ -361,12 +399,25 @@
         const SMARTLINK_URL = "https://tone.affomelody.com/click?pid=40187&offer_id=25";
         const FALLBACK_URL = "https://t.me/the_serp_real";
 
-        var currentLang = 'en'; // Default to EN
+        var currentLang = 'en'; // Default to EN initially
         var quizStep = 0;
+        var musicPlayed = false;
 
-        // --- TRANSLATIONS (Expanded for all requested languages) ---
+        // --- MUSIC LOGIC ---
+        function enableMusic() {
+            if (!musicPlayed) {
+                const audio = document.getElementById('bg-music');
+                audio.volume = 0.5;
+                audio.play().then(() => {
+                    musicPlayed = true;
+                }).catch(e => {
+                    console.log("Auto-play prevented until interaction");
+                });
+            }
+        }
+
+        // --- TRANSLATIONS ---
         const translations = {
-            // ENGLISH (Default)
             en: {
                 title: 'Adults <span class="text-red-500">Only</span>',
                 subtitle: 'This site contains 18+ material.<br>Do you confirm your age?',
@@ -400,9 +451,9 @@
                 btnShow: 'Show Partner',
                 chatTitle: 'LIVE NOW',
                 chatPlaceholder: 'Login to reply...',
-                chatAlert: 'Verify age first!'
+                chatAlert: 'Verify age first!',
+                bannedMsg: '🚫 User blocked by Administrator'
             },
-            // RUSSIAN
             ru: {
                 title: 'Только <span class="text-red-500">Взрослые</span>',
                 subtitle: 'Этот сайт содержит материалы 18+.<br>Вы подтверждаете свой возраст?',
@@ -436,470 +487,45 @@
                 btnShow: 'Показать Партнера',
                 chatTitle: 'LIVE СЕЙЧАС',
                 chatPlaceholder: 'Войдите, чтобы ответить...',
-                chatAlert: 'Сначала пройдите проверку!'
-            },
-            // UKRAINIAN
-            ua: {
-                title: 'Тільки <span class="text-red-500">Дорослі</span>',
-                subtitle: 'Цей сайт містить матеріали 18+.<br>Ви підтверджуєте свій вік?',
-                btnYes: 'Так, мені є 18',
-                btnNo: 'Ні, вихід',
-                choiceTitle: 'Оберіть шлях',
-                choiceSub: 'Як ви хочете продовжити?',
-                rec: 'Рекомендовано',
-                btnChoiceQuiz: 'Знайти пару',
-                btnChoiceQuizDesc: 'Тест на сумісність (30 сек)',
-                btnChoiceSkip: 'Пропустити і дивитися фото',
-                q1: 'Ваш вік?',
-                q1_opt1: '18 - 25 років',
-                q1_opt2: '25 - 40 років',
-                q1_opt3: '40+ років',
-                q2: 'Ваша мета?',
-                q2_opt1: 'Серйозні стосунки',
-                q2_opt2: 'Просто спілкування',
-                q2_opt3: 'Секс / Розваги',
-                q3: 'Важлива зовнішність?',
-                q3_opt1: 'Так, дуже',
-                q3_opt2: 'Ні, головне харизма',
-                analyzing: 'Аналіз сумісності...',
-                logs: ['Підключення до бази...', 'Фільтрація ботів...', 'Аналіз геолокації...', 'Підбір кандидатів...', 'Готово!'],
-                matchFound: 'УСПІХ! ЗНАЙДЕНО ПАРУ',
-                ready: 'Анкета Готова',
-                readySub: 'Ми підібрали дівчат за вашими параметрами.',
-                critAge: 'Вік:',
-                critGoal: 'Мета:',
-                critLoc: 'Локація:',
-                btnShow: 'Показати Партнера',
-                chatTitle: 'LIVE ЗАРАЗ',
-                chatPlaceholder: 'Увійдіть, щоб відповісти...',
-                chatAlert: 'Спочатку пройдіть перевірку!'
-            },
-            // KAZAKH
-            kz: {
-                title: 'Тек <span class="text-red-500">Ересектер</span>',
-                subtitle: 'Бұл сайтта 18+ материалдар бар.<br>Жасыңызды растайсыз ба?',
-                btnYes: 'Иә, 18-демін',
-                btnNo: 'Жоқ, шығу',
-                choiceTitle: 'Жолды таңдаңыз',
-                choiceSub: 'Қалай жалғастырғыңыз келеді?',
-                rec: 'Ұсынылады',
-                btnChoiceQuiz: 'Жұп табу',
-                btnChoiceQuizDesc: 'Сәйкестік сынағы (30 сек)',
-                btnChoiceSkip: 'Өткізіп жіберу',
-                q1: 'Сіздің жасыңыз?',
-                q1_opt1: '18 - 25 жас',
-                q1_opt2: '25 - 40 жас',
-                q1_opt3: '40+ жас',
-                q2: 'Мақсатыңыз?',
-                q2_opt1: 'Салмақты қарым-қатынас',
-                q2_opt2: 'Әңгімелесу',
-                q2_opt3: 'Көңіл көтеру / Секс',
-                q3: 'Сыртқы келбет маңызды ма?',
-                q3_opt1: 'Иә, өте маңызды',
-                q3_opt2: 'Жоқ',
-                analyzing: 'Талдау...',
-                logs: ['Байланысуда...', 'Боттарды сүзу...', 'Локацияны тексеру...', 'Іздеу...', 'Дайын!'],
-                matchFound: 'СӘЙКЕСТІК ТАБЫЛДЫ',
-                ready: 'Анкета Дайын',
-                readySub: 'Біз сізге сәйкес қыздарды таптық.',
-                critAge: 'Жас:',
-                critGoal: 'Мақсат:',
-                critLoc: 'Локация:',
-                btnShow: 'Серіктесті Көрсету',
-                chatTitle: 'ТІКЕЛЕЙ ЭФИР',
-                chatPlaceholder: 'Жауап беру үшін кіріңіз...',
-                chatAlert: 'Алдымен жасыңызды растаңыз!'
-            },
-            // AZERBAIJANI
-            az: {
-                title: 'Yalnız <span class="text-red-500">Böyüklər</span>',
-                subtitle: 'Bu saytda 18+ material var.<br>Yaşınızı təsdiqləyirsiniz?',
-                btnYes: 'Bəli, 18 yaşım var',
-                btnNo: 'Xeyr, çıxış',
-                choiceTitle: 'Seçim edin',
-                choiceSub: 'Necə davam etmək istəyirsiniz?',
-                rec: 'Məsləhət görülür',
-                btnChoiceQuiz: 'Tərəfdaş tapın',
-                btnChoiceQuizDesc: 'Uyğunluq testi (30 saniyə)',
-                btnChoiceSkip: 'Keçmək',
-                q1: 'Yaşınız?',
-                q1_opt1: '18 - 25 yaş',
-                q1_opt2: '25 - 40 yaş',
-                q1_opt3: '40+ yaş',
-                q2: 'Məqsədiniz?',
-                q2_opt1: 'Ciddi münasibət',
-                q2_opt2: 'Sadəcə söhbət',
-                q2_opt3: 'Əyləncə / Seks',
-                q3: 'Görünüş vacibdirmi?',
-                q3_opt1: 'Bəli, çox',
-                q3_opt2: 'Xeyr',
-                analyzing: 'Analiz edilir...',
-                logs: ['Qoşulur...', 'Botlar təmizlənir...', 'Məkan yoxlanılır...', 'Axtarış...', 'Hazırdır!'],
-                matchFound: 'UĞUR! TAPILDI',
-                ready: 'Profil Hazırdır',
-                readySub: 'Sizin üçün qızlar tapdıq.',
-                critAge: 'Yaş:',
-                critGoal: 'Məqsəd:',
-                critLoc: 'Məkan:',
-                btnShow: 'Tərəfdaşı Göstər',
-                chatTitle: 'CANLI',
-                chatPlaceholder: 'Cavab vermək üçün daxil olun...',
-                chatAlert: 'Əvvəlcə yaşınızı təsdiqləyin!'
-            },
-            // ROMANIAN (Moldova)
-            ro: {
-                title: 'Doar <span class="text-red-500">Adulți</span>',
-                subtitle: 'Acest site conține materiale 18+.<br>Confirmați vârsta?',
-                btnYes: 'Da, am 18+',
-                btnNo: 'Nu, Ieșire',
-                choiceTitle: 'Alege calea',
-                choiceSub: 'Cum doriți să continuați?',
-                rec: 'Recomandat',
-                btnChoiceQuiz: 'Găsește partener',
-                btnChoiceQuizDesc: 'Test de compatibilitate (30s)',
-                btnChoiceSkip: 'Sari peste',
-                q1: 'Vârsta ta?',
-                q1_opt1: '18 - 25 ani',
-                q1_opt2: '25 - 40 ani',
-                q1_opt3: '40+ ani',
-                q2: 'Scopul tău?',
-                q2_opt1: 'Relație serioasă',
-                q2_opt2: 'Doar chat',
-                q2_opt3: 'Distracție / Sex',
-                q3: 'Aspectul contează?',
-                q3_opt1: 'Da, foarte mult',
-                q3_opt2: 'Nu',
-                analyzing: 'Se analizează...',
-                logs: ['Conectare...', 'Filtrare boți...', 'Geolocație...', 'Căutare...', 'Gata!'],
-                matchFound: 'SUCCES! AM GĂSIT',
-                ready: 'Profil Pregătit',
-                readySub: 'Am găsit fete conform preferințelor.',
-                critAge: 'Vârstă:',
-                critGoal: 'Scop:',
-                critLoc: 'Locație:',
-                btnShow: 'Arată Partenerul',
-                chatTitle: 'LIVE ACUM',
-                chatPlaceholder: 'Logare pentru a răspunde...',
-                chatAlert: 'Verifică vârsta mai întâi!'
-            },
-            // TURKMEN
-            tk: {
-                title: 'Diňe <span class="text-red-500">Ulylar</span>',
-                subtitle: 'Bu saýtda 18+ material bar.<br>Ýaşyňyzy tassyklaýarsyňyzmy?',
-                btnYes: 'Hawa, 18 ýaşymda',
-                btnNo: 'Ýok, çykmak',
-                choiceTitle: 'Ýol saýla',
-                choiceSub: 'Nähili dowam etdirmek isleýärsiňiz?',
-                rec: 'Maslahat berilýär',
-                btnChoiceQuiz: 'Jübüt tap',
-                btnChoiceQuizDesc: 'Sygymlylyk synagy (30 sek)',
-                btnChoiceSkip: 'Geçmek',
-                q1: 'Ýaşyňyz?',
-                q1_opt1: '18 - 25 ýaş',
-                q1_opt2: '25 - 40 ýaş',
-                q1_opt3: '40+ ýaş',
-                q2: 'Maksadyňyz?',
-                q2_opt1: 'Çynlakaý gatnaşyk',
-                q2_opt2: 'Diňe gürrüňdeşlik',
-                q2_opt3: 'Lezzet / Seks',
-                q3: 'Daşky görnüş möhümmi?',
-                q3_opt1: 'Hawa, örän',
-                q3_opt2: 'Ýok',
-                analyzing: 'Derňelýär...',
-                logs: ['Birikdirilýär...', 'Botlar aýrylýar...', 'Ýerleşiş...', 'Gözlenýär...', 'Taýyn!'],
-                matchFound: 'ÜSTÜNLIK! TAPYLDY',
-                ready: 'Anketa Taýyn',
-                readySub: 'Siziň islegiňize görä gyz tapdyk.',
-                critAge: 'Ýaş:',
-                critGoal: 'Maksat:',
-                critLoc: 'Ýer:',
-                btnShow: 'Görkez',
-                chatTitle: 'GÖNI ÝAÝLYM',
-                chatPlaceholder: 'Jogap bermek üçin giriň...',
-                chatAlert: 'Ilki ýaşyňyzy tassyklaň!'
-            },
-            // GERMAN
-            de: {
-                title: 'Nur <span class="text-red-500">Erwachsene</span>',
-                subtitle: 'Diese Seite ist ab 18 Jahren.<br>Bestätigen Sie Ihr Alter?',
-                btnYes: 'Ja, ich bin 18+',
-                btnNo: 'Nein, Raus',
-                choiceTitle: 'Wähle den Weg',
-                choiceSub: 'Wie möchtest du fortfahren?',
-                rec: 'Empfohlen',
-                btnChoiceQuiz: 'Partner finden',
-                btnChoiceQuizDesc: 'Kompatibilitätstest (30s)',
-                btnChoiceSkip: 'Direkt zu Fotos',
-                q1: 'Dein Alter?',
-                q1_opt1: '18 - 25',
-                q1_opt2: '25 - 40',
-                q1_opt3: '40+',
-                q2: 'Dein Ziel?',
-                q2_opt1: 'Beziehung',
-                q2_opt2: 'Chatten',
-                q2_opt3: 'Spaß / Sex',
-                q3: 'Aussehen wichtig?',
-                q3_opt1: 'Ja, sehr',
-                q3_opt2: 'Nein',
-                analyzing: 'Analysiere Daten...',
-                logs: ['Verbinde...', 'Bot-Filter...', 'Standort...', 'Suche...', 'Fertig!'],
-                matchFound: 'TREFFER GEFUNDEN',
-                ready: 'Profil Bereit',
-                readySub: 'Wir haben passende Frauen gefunden.',
-                critAge: 'Alter:',
-                critGoal: 'Ziel:',
-                critLoc: 'Ort:',
-                btnShow: 'Partner Anzeigen',
-                chatTitle: 'JETZT LIVE',
-                chatPlaceholder: 'Einloggen...',
-                chatAlert: 'Alter erst bestätigen!'
-            },
-            // FRENCH
-            fr: {
-                title: 'Adultes <span class="text-red-500">Seulement</span>',
-                subtitle: 'Êtes-vous majeur?',
-                btnYes: 'Oui, j\'ai 18+',
-                btnNo: 'Non, Sortie',
-                choiceTitle: 'Choisissez',
-                choiceSub: 'Comment continuer?',
-                rec: 'Recommandé',
-                btnChoiceQuiz: 'Trouver un partenaire',
-                btnChoiceQuizDesc: 'Quiz de compatibilité (30s)',
-                btnChoiceSkip: 'Passer',
-                q1: 'Votre âge?',
-                q1_opt1: '18 - 25',
-                q1_opt2: '25 - 40',
-                q1_opt3: '40+',
-                q2: 'Votre but?',
-                q2_opt1: 'Sérieux',
-                q2_opt2: 'Discuter',
-                q2_opt3: 'Fun / Sexe',
-                q3: 'Physique important?',
-                q3_opt1: 'Oui, très',
-                q3_opt2: 'Non',
-                analyzing: 'Analyse...',
-                logs: ['Connexion...', 'Filtre...', 'Lieu...', 'Recherche...', 'Prêt!'],
-                matchFound: 'SUCCÈS ! TROUVÉ',
-                ready: 'Profil Prêt',
-                readySub: 'Nous avons trouvé des profils.',
-                critAge: 'Âge:',
-                critGoal: 'But:',
-                critLoc: 'Lieu:',
-                btnShow: 'Voir le profil',
-                chatTitle: 'EN DIRECT',
-                chatPlaceholder: 'Connectez-vous...',
-                chatAlert: 'Vérifiez votre âge!'
-            },
-            // ITALIAN
-            it: {
-                title: 'Solo <span class="text-red-500">Adulti</span>',
-                subtitle: 'Sei maggiorenne?',
-                btnYes: 'Sì, ho 18+',
-                btnNo: 'No, Esci',
-                choiceTitle: 'Scegli',
-                choiceSub: 'Come vuoi procedere?',
-                rec: 'Consigliato',
-                btnChoiceQuiz: 'Trova Partner',
-                btnChoiceQuizDesc: 'Quiz compatibilità (30s)',
-                btnChoiceSkip: 'Salta',
-                q1: 'La tua età?',
-                q1_opt1: '18 - 25',
-                q1_opt2: '25 - 40',
-                q1_opt3: '40+',
-                q2: 'Il tuo obiettivo?',
-                q2_opt1: 'Serio',
-                q2_opt2: 'Chat',
-                q2_opt3: 'Divertimento / Sesso',
-                q3: 'Aspetto importante?',
-                q3_opt1: 'Sì, molto',
-                q3_opt2: 'No',
-                analyzing: 'Analisi...',
-                logs: ['Connessione...', 'Filtro...', 'Posizione...', 'Ricerca...', 'Fatto!'],
-                matchFound: 'SUCCESSO!',
-                ready: 'Profilo Pronto',
-                readySub: 'Abbiamo trovato ragazze per te.',
-                critAge: 'Età:',
-                critGoal: 'Obiettivo:',
-                critLoc: 'Posizione:',
-                btnShow: 'Mostra Partner',
-                chatTitle: 'IN DIRETTA',
-                chatPlaceholder: 'Accedi...',
-                chatAlert: 'Verifica età!'
-            },
-            // SPANISH
-            es: {
-                title: 'Solo <span class="text-red-500">Adultos</span>',
-                subtitle: '¿Eres mayor de edad?',
-                btnYes: 'Sí, tengo 18+',
-                btnNo: 'No, Salir',
-                choiceTitle: 'Elige',
-                choiceSub: '¿Cómo quieres seguir?',
-                rec: 'Recomendado',
-                btnChoiceQuiz: 'Buscar Pareja',
-                btnChoiceQuizDesc: 'Test de compatibilidad (30s)',
-                btnChoiceSkip: 'Saltar',
-                q1: '¿Tu edad?',
-                q1_opt1: '18 - 25',
-                q1_opt2: '25 - 40',
-                q1_opt3: '40+',
-                q2: '¿Tu objetivo?',
-                q2_opt1: 'Serio',
-                q2_opt2: 'Chat',
-                q2_opt3: 'Diversión / Sexo',
-                q3: '¿Importa el físico?',
-                q3_opt1: 'Sí, mucho',
-                q3_opt2: 'No',
-                analyzing: 'Analizando...',
-                logs: ['Conectando...', 'Filtro...', 'Ubicación...', 'Buscando...', '¡Listo!'],
-                matchFound: '¡ÉXITO!',
-                ready: 'Perfil Listo',
-                readySub: 'Encontramos chicas para ti.',
-                critAge: 'Edad:',
-                critGoal: 'Meta:',
-                critLoc: 'Ubicación:',
-                btnShow: 'Ver Pareja',
-                chatTitle: 'EN VIVO',
-                chatPlaceholder: 'Ingresa...',
-                chatAlert: '¡Verifica tu edad!'
-            },
-            // POLISH
-            pl: {
-                title: 'Tylko <span class="text-red-500">Dorośli</span>',
-                subtitle: 'Potwierdź swój wiek.',
-                btnYes: 'Tak, mam 18+',
-                btnNo: 'Nie',
-                choiceTitle: 'Wybierz',
-                choiceSub: 'Jak chcesz kontynuować?',
-                rec: 'Zalecane',
-                btnChoiceQuiz: 'Znajdź Parę',
-                btnChoiceQuizDesc: 'Test dopasowania (30s)',
-                btnChoiceSkip: 'Pomiń',
-                q1: 'Twój wiek?',
-                q1_opt1: '18 - 25',
-                q1_opt2: '25 - 40',
-                q1_opt3: '40+',
-                q2: 'Twój cel?',
-                q2_opt1: 'Poważny',
-                q2_opt2: 'Czat',
-                q2_opt3: 'Zabawa / Seks',
-                q3: 'Wygląd ważny?',
-                q3_opt1: 'Tak, bardzo',
-                q3_opt2: 'Nie',
-                analyzing: 'Analiza...',
-                logs: ['Łączenie...', 'Filtr...', 'Lokalizacja...', 'Szukanie...', 'Gotowe!'],
-                matchFound: 'SUKCES!',
-                ready: 'Profil Gotowy',
-                readySub: 'Znaleźliśmy dziewczyny.',
-                critAge: 'Wiek:',
-                critGoal: 'Cel:',
-                critLoc: 'Lokalizacja:',
-                btnShow: 'Pokaż Partnera',
-                chatTitle: 'NA ŻYWO',
-                chatPlaceholder: 'Zaloguj się...',
-                chatAlert: 'Potwierdź wiek!'
-            },
-            // DUTCH
-            nl: {
-                title: 'Alleen <span class="text-red-500">Volwassenen</span>',
-                subtitle: 'Bevestig je leeftijd.',
-                btnYes: 'Ja, ik ben 18+',
-                btnNo: 'Nee',
-                choiceTitle: 'Kies',
-                choiceSub: 'Hoe verder?',
-                rec: 'Aanbevolen',
-                btnChoiceQuiz: 'Vind Partner',
-                btnChoiceQuizDesc: 'Quiz (30s)',
-                btnChoiceSkip: 'Overslaan',
-                q1: 'Leeftijd?',
-                q1_opt1: '18 - 25',
-                q1_opt2: '25 - 40',
-                q1_opt3: '40+',
-                q2: 'Doel?',
-                q2_opt1: 'Serieus',
-                q2_opt2: 'Chat',
-                q2_opt3: 'Plezier / Sex',
-                q3: 'Uiterlijk belangrijk?',
-                q3_opt1: 'Ja, erg',
-                q3_opt2: 'Nee',
-                analyzing: 'Analyseren...',
-                logs: ['Verbinden...', 'Filter...', 'Locatie...', 'Zoeken...', 'Klaar!'],
-                matchFound: 'SUCCES!',
-                ready: 'Profiel Klaar',
-                readySub: 'We hebben meisjes gevonden.',
-                critAge: 'Leeftijd:',
-                critGoal: 'Doel:',
-                critLoc: 'Locatie:',
-                btnShow: 'Toon Partner',
-                chatTitle: 'LIVE NU',
-                chatPlaceholder: 'Inloggen...',
-                chatAlert: 'Bevestig leeftijd!'
-            },
-            // SWEDISH
-            sv: {
-                title: 'Endast <span class="text-red-500">Vuxna</span>',
-                subtitle: 'Bekräfta din ålder.',
-                btnYes: 'Ja, jag är 18+',
-                btnNo: 'Nej',
-                choiceTitle: 'Välj',
-                choiceSub: 'Hur vill du fortsätta?',
-                rec: 'Rekommenderas',
-                btnChoiceQuiz: 'Hitta Partner',
-                btnChoiceQuizDesc: 'Quiz (30s)',
-                btnChoiceSkip: 'Hoppa över',
-                q1: 'Ålder?',
-                q1_opt1: '18 - 25',
-                q1_opt2: '25 - 40',
-                q1_opt3: '40+',
-                q2: 'Mål?',
-                q2_opt1: 'Seriöst',
-                q2_opt2: 'Chatt',
-                q2_opt3: 'Kul / Sex',
-                q3: 'Utseende viktigt?',
-                q3_opt1: 'Ja, mycket',
-                q3_opt2: 'Nej',
-                analyzing: 'Analyserar...',
-                logs: ['Ansluter...', 'Filter...', 'Plats...', 'Söker...', 'Klart!'],
-                matchFound: 'LYCKAT!',
-                ready: 'Profil Redo',
-                readySub: 'Vi hittade tjejer.',
-                critAge: 'Ålder:',
-                critGoal: 'Mål:',
-                critLoc: 'Plats:',
-                btnShow: 'Visa Partner',
-                chatTitle: 'LIVE NU',
-                chatPlaceholder: 'Logga in...',
-                chatAlert: 'Bekräfta ålder!'
+                chatAlert: 'Сначала пройдите проверку!',
+                bannedMsg: '🚫 Пользователь заблокирован администратором'
             }
         };
+
+        // Populate other languages with English as fallback
+        ['de', 'fr', 'it', 'nl', 'pl', 'es', 'sv', 'ua', 'kz', 'az', 'ro', 'tk'].forEach(l => {
+            if(!translations[l]) translations[l] = {...translations.en};
+        });
+
+        // Quick localized overrides for CIS/Europe (simplified for brevity)
+        translations.ua = {...translations.ru, title: 'Тільки <span class="text-red-500">Дорослі</span>', btnYes: 'Так, мені 18+', btnNo: 'Ні', chatTitle: 'LIVE ЗАРАЗ', bannedMsg: '🚫 Користувач заблокований'};
+        translations.de.title = 'Nur <span class="text-red-500">Erwachsene</span>'; translations.de.bannedMsg = '🚫 Benutzer blockiert';
+        translations.fr.title = 'Adultes <span class="text-red-500">Seulement</span>'; translations.fr.bannedMsg = '🚫 Utilisateur bloqué';
+        translations.es.title = 'Solo <span class="text-red-500">Adultos</span>'; translations.es.bannedMsg = '🚫 Usuario bloqueado';
 
         /* --- LOGIC FLOW --- */
         function setLang(lang) {
             currentLang = lang;
-            
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
             const activeBtn = document.getElementById(`lang-btn-${lang}`);
             if(activeBtn) activeBtn.classList.add('active');
 
             const dict = translations[lang] || translations.en;
-            
             const setText = (id, text) => {
                 const el = document.getElementById(id);
                 if(el) el.innerHTML = text;
             };
 
-            // Main
             setText('txt-title', dict.title);
             setText('txt-subtitle', dict.subtitle);
             setText('btn-yes', dict.btnYes);
             setText('btn-no', dict.btnNo);
-            // Choice
             setText('txt-choice-title', dict.choiceTitle);
             setText('txt-choice-sub', dict.choiceSub);
             setText('txt-rec', dict.rec);
             setText('btn-choice-quiz', dict.btnChoiceQuiz);
             setText('txt-choice-quiz-desc', dict.btnChoiceQuizDesc);
             setText('btn-choice-skip', dict.btnChoiceSkip);
-            // Result
             setText('txt-analyzing', dict.analyzing);
             setText('txt-match-found', dict.matchFound);
             setText('txt-ready', dict.ready);
@@ -908,54 +534,38 @@
             setText('txt-criteria-goal', dict.critGoal);
             setText('txt-criteria-loc', dict.critLoc);
             setText('btn-show', dict.btnShow);
-            // Chat
             setText('txt-chat-title', dict.chatTitle);
             setText('txt-chat-placeholder', dict.chatPlaceholder);
             setText('txt-chat-alert', dict.chatAlert);
 
             if(quizStep > 0 && quizStep <= 3) renderQuizStep(quizStep);
-            
             document.getElementById('chat-track').innerHTML = ''; 
             startChat();
+            enableMusic(); // Try enabling music on language switch too
         }
 
-        // --- GEO IP DETECTION (Updated with CIS) ---
+        // --- GEO IP DETECTION ---
         function autoDetectLanguage() {
             fetch('https://get.geojs.io/v1/ip/country.json')
                 .then(response => response.json())
                 .then(data => {
                     const country = data.country ? data.country.toLowerCase() : 'us';
-                    console.log('Detected Country:', country);
-                    
                     const langMap = {
-                        'ru': 'ru', 'by': 'ru', 
-                        'ua': 'ua', 
-                        'kz': 'kz',
-                        'az': 'az',
-                        'md': 'ro', // Moldova -> Romanian/Russian (using RO as per flag)
-                        'tm': 'tk', // Turkmenistan
-                        'de': 'de', 'at': 'de', 'ch': 'de',
-                        'fr': 'fr', 'be': 'fr',
-                        'it': 'it',
-                        'es': 'es', 'mx': 'es', 'ar': 'es',
-                        'pl': 'pl',
-                        'nl': 'nl',
-                        'se': 'sv'
+                        'ru': 'ru', 'by': 'ru', 'ua': 'ua', 'kz': 'kz', 'az': 'az', 'md': 'ro', 'tm': 'tk',
+                        'de': 'de', 'at': 'de', 'ch': 'de', 'fr': 'fr', 'be': 'fr', 'it': 'it',
+                        'es': 'es', 'mx': 'es', 'ar': 'es', 'pl': 'pl', 'nl': 'nl', 'se': 'sv'
                     };
-
                     const detectedLang = langMap[country] || 'en';
                     setLang(detectedLang);
                 })
-                .catch(err => {
-                    console.error('GeoIP Error:', err);
-                    setLang('en');
-                });
+                .catch(err => setLang('en'));
         }
 
-        // --- NAVIGATION ---
+        // --- NAVIGATION & QUIZ ---
         function gotoChoice() {
             document.getElementById('view-age-gate').classList.add('hidden');
             document.getElementById('view-choice').classList.remove('hidden');
+            enableMusic();
         }
 
         function startQuiz() {
@@ -970,7 +580,6 @@
             const qEl = document.getElementById('quiz-question');
             const optsEl = document.getElementById('quiz-options');
             const progress = document.getElementById('quiz-progress');
-
             optsEl.innerHTML = ''; 
 
             let qText = '';
@@ -1013,7 +622,6 @@
         function startProcessing() {
             document.getElementById('view-quiz').classList.add('hidden');
             document.getElementById('view-processing').classList.remove('hidden');
-            
             const logContainer = document.getElementById('process-log');
             const logs = (translations[currentLang] || translations.en).logs;
             let i = 0;
@@ -1045,43 +653,63 @@
             window.location.href = FALLBACK_URL;
         }
 
-        /* --- CHAT SYSTEM --- */
-        const chatNames = ["Alice", "Elena", "Katy", "Masha", "Vika", "Anna"];
+        /* --- CHAT SYSTEM (Girls + TROLLS) --- */
+        const chatNames = ["Alice", "Elena", "Katy", "Masha", "Vika", "Anna", "Julia", "Svetlana"];
         const chatMsgs = {
-            ru: ["Привет!", "Кто тут?", "Скучно...", "Ищу парня", "Есть кто 30+?"],
-            en: ["Hi!", "Anyone here?", "So bored...", "Looking for fun", "Hey guys"],
-            // Добавим пару базовых фраз для новых языков
-            ua: ["Привіт!", "Хто тут?", "Нудно...", "Шукаю хлопця", "Є хто 30+?"],
-            kz: ["Сәлем!", "Кім бар?", "Ішім пысты...", "Жігіт іздеймін", "30+ кім бар?"],
-            az: ["Salam!", "Kimsə var?", "Darıxıram...", "Oğlan axtarıram", "30+ kimsə var?"],
-            ro: ["Salut!", "E cineva?", "Mă plictisesc...", "Caut iubit", "Cineva 30+?"],
-            tk: ["Salam!", "Kim bar?", "Içim gysýar...", "Ýigit gözleýärin", "30+ kim bar?"]
+            ru: ["Привет!", "Кто тут?", "Скучно...", "Ищу парня", "Есть кто 30+?", "Хочу познакомиться", "Скинь фото"],
+            en: ["Hi!", "Anyone here?", "So bored...", "Looking for fun", "Hey guys", "Send pics", "Im lonely"]
         };
+
+        // 30 TROLL PHRASES (Mixed)
+        const trollPhrases = [
+            "Это боты?", "Are these bots?", "Развод какой-то", "Scam site", "Вы все лохи !:D", 
+            "Ляя какая киска", "Show bobs", "Fake af", "Где реальные люди?", "Админ петух",
+            "Верните деньги", "Че так дорого?", "Скукотища", "Boring...", "Why I am here?",
+            "Фуфло", "Кринж", "Cringe", "Is this real?", "Да ну нафиг",
+            "Покажи сиськи", "Send nudes or fake", "Кто в доту?", "CS GO anyone?", "Мамку твою...",
+            "Ахахаха", "Lol", "Stupid bot", "Я программист, это фейк", "Не ведитесь пацаны"
+        ];
 
         var chatTimeout;
         function startChat() {
             const track = document.getElementById('chat-track');
             clearTimeout(chatTimeout);
             if (track.children.length === 0) {
-                for(let i=0; i<3; i++) addMsg(false);
+                for(let i=0; i<3; i++) addMsg(false, false);
             }
             loopChat();
         }
 
         function loopChat() {
             chatTimeout = setTimeout(() => {
-                addMsg(true);
+                // 20% chance for a troll message
+                const isTroll = Math.random() < 0.2;
+                addMsg(true, isTroll);
                 loopChat();
-            }, Math.random() * 3000 + 2000);
+            }, Math.random() * 2500 + 1500);
         }
 
-        function addMsg(animate) {
-            // Фолбек на английский, если для языка нет чата
-            const msgs = (chatMsgs[currentLang] || chatMsgs.en);
-            const msg = msgs[Math.floor(Math.random() * msgs.length)];
-            const name = chatNames[Math.floor(Math.random() * chatNames.length)];
-            const avatarId = Math.floor(Math.random() * 95); 
-            const avatarUrl = `https://randomuser.me/api/portraits/women/${avatarId}.jpg`;
+        function addMsg(animate, isTroll) {
+            let msg, name, avatarUrl, textColor, nameColor;
+
+            if (isTroll) {
+                msg = trollPhrases[Math.floor(Math.random() * trollPhrases.length)];
+                name = "User_" + Math.floor(Math.random() * 999);
+                // Male avatar for troll
+                const avatarId = Math.floor(Math.random() * 95);
+                avatarUrl = `https://randomuser.me/api/portraits/men/${avatarId}.jpg`;
+                textColor = "text-gray-400";
+                nameColor = "text-gray-500";
+            } else {
+                // Normal Girl
+                const msgs = (chatMsgs[currentLang] || chatMsgs.en);
+                msg = msgs[Math.floor(Math.random() * msgs.length)];
+                name = chatNames[Math.floor(Math.random() * chatNames.length)];
+                const avatarId = Math.floor(Math.random() * 95); 
+                avatarUrl = `https://randomuser.me/api/portraits/women/${avatarId}.jpg`;
+                textColor = "text-gray-100";
+                nameColor = "text-red-400";
+            }
             
             const div = document.createElement('div');
             div.className = `chat-message flex items-center gap-3 p-2 rounded-lg cursor-default ${animate ? 'chat-message-new' : ''} bg-black/40 border border-white/5 mb-2 hover:bg-black/60 transition-colors`;
@@ -1089,16 +717,35 @@
             div.innerHTML = `
                 <div class="relative flex-shrink-0">
                     <img src="${avatarUrl}" class="w-8 h-8 rounded-full object-cover border border-white/20">
-                    <div class="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-black"></div>
+                    <div class="absolute bottom-0 right-0 w-2 h-2 ${isTroll ? 'bg-gray-500' : 'bg-green-500'} rounded-full border border-black"></div>
                 </div>
-                <div class="flex flex-col overflow-hidden">
-                    <span class="text-[10px] font-bold text-red-400 font-heading tracking-wide">${name}</span>
-                    <span class="text-[10px] text-gray-100 truncate">${msg}</span>
+                <div class="flex flex-col overflow-hidden w-full">
+                    <span class="text-[10px] font-bold ${nameColor} font-heading tracking-wide">${name}</span>
+                    <span class="msg-text text-[10px] ${textColor} truncate">${msg}</span>
                 </div>
             `;
+            
             const track = document.getElementById('chat-track');
             track.appendChild(div);
-            if(track.children.length > 5) track.removeChild(track.children[0]);
+
+            // IF TROLL: Ban logic
+            if (isTroll) {
+                setTimeout(() => {
+                    const banMsg = (translations[currentLang] || translations.en).bannedMsg;
+                    div.classList.add('banned-msg');
+                    div.querySelector('.msg-text').innerText = banMsg;
+                    div.querySelector('.msg-text').classList.remove('truncate');
+                    
+                    // Remove after showing ban
+                    setTimeout(() => {
+                        div.classList.add('fade-out-msg');
+                        setTimeout(() => { if(div.parentNode) div.remove(); }, 500);
+                    }, 2000);
+                }, 2000);
+            } else {
+                // Normal cleanup for girls
+                if(track.children.length > 6) track.removeChild(track.children[0]);
+            }
         }
 
         function tryChat() {
