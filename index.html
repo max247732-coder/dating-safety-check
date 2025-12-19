@@ -342,6 +342,8 @@
                     <button onclick="redirectSmartlink()" class="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-bold py-5 rounded-xl uppercase tracking-wider text-xl shadow-[0_0_25px_rgba(34,197,94,0.5)] pulse-green active:scale-95 transition-transform font-heading">
                         <span id="btn-show">Показать Партнера</span>
                     </button>
+                    <!-- ДОБАВЛЕНО ПРИМЕЧАНИЕ ЗДЕСЬ -->
+                    <p id="txt-disclaimer" class="text-[10px] text-gray-400 mt-3 px-4 leading-tight opacity-70"></p>
                 </div>
 
             </div>
@@ -428,7 +430,8 @@
                 chatTitle: 'LIVE NOW',
                 chatPlaceholder: 'Login to reply...',
                 chatAlert: 'Verify age first!',
-                bannedMsg: '🚫 User blocked by Administrator'
+                bannedMsg: '🚫 User blocked by Administrator',
+                disclaimer: 'A service has been selected for your profile. Additional survey may be required after registration to improve matching accuracy.'
             },
             ru: {
                 title: 'Только <span class="text-red-500">Взрослые</span>',
@@ -464,7 +467,8 @@
                 chatTitle: 'LIVE СЕЙЧАС',
                 chatPlaceholder: 'Войдите, чтобы ответить...',
                 chatAlert: 'Сначала пройдите проверку!',
-                bannedMsg: '🚫 Пользователь заблокирован администратором'
+                bannedMsg: '🚫 Пользователь заблокирован администратором',
+                disclaimer: 'Под вашу анкету подобран сервис. Возможно дополнительное анкетирование после регистрации для повышения точности подбора девушки.'
             },
             // UKRAINIAN
             ua: {
@@ -501,7 +505,8 @@
                 chatTitle: 'LIVE ЗАРАЗ',
                 chatPlaceholder: 'Увійдіть, щоб відповісти...',
                 chatAlert: 'Спочатку пройдіть перевірку!',
-                bannedMsg: '🚫 Користувач заблокований адміністратором'
+                bannedMsg: '🚫 Користувач заблокований адміністратором',
+                disclaimer: 'Під вашу анкету підібрано сервіс. Можливе додаткове анкетування після реєстрації для підвищення точності підбору дівчини.'
             },
             // KAZAKH
             kz: {
@@ -538,7 +543,8 @@
                 chatTitle: 'ТІКЕЛЕЙ ЭФИР',
                 chatPlaceholder: 'Жауап беру үшін кіріңіз...',
                 chatAlert: 'Алдымен жасыңызды растаңыз!',
-                bannedMsg: '🚫 Пайдаланушы бұғатталды'
+                bannedMsg: '🚫 Пайдаланушы бұғатталды',
+                disclaimer: 'Сіздің сауалнамаңызға сәйкес қызмет таңдалды. Қызды дәл таңдау үшін тіркелгеннен кейін қосымша сауалнама қажет болуы мүмкін.'
             },
             // AZERBAIJANI
             az: {
@@ -575,7 +581,8 @@
                 chatTitle: 'CANLI',
                 chatPlaceholder: 'Cavab vermək üçün daxil olun...',
                 chatAlert: 'Əvvəlcə yaşınızı təsdiqləyin!',
-                bannedMsg: '🚫 İstifadəçi bloklandı'
+                bannedMsg: '🚫 İstifadəçi bloklandı',
+                disclaimer: 'Anketinizə uyğun xidmət seçilib. Qız seçiminin dəqiqliyini artırmaq üçün qeydiyyatdan sonra əlavə sorğu tələb oluna bilər.'
             },
             // ROMANIAN (Moldova)
             ro: {
@@ -612,7 +619,8 @@
                 chatTitle: 'LIVE ACUM',
                 chatPlaceholder: 'Logare pentru a răspunde...',
                 chatAlert: 'Verifică vârsta mai întâi!',
-                bannedMsg: '🚫 Utilizator blocat'
+                bannedMsg: '🚫 Utilizator blocat',
+                disclaimer: 'Un serviciu a fost selectat pentru profilul tău. Poate fi necesar un sondaj suplimentar după înregistrare pentru a îmbunătăți precizia potrivirii.'
             },
             // TURKMEN
             tk: {
@@ -649,7 +657,8 @@
                 chatTitle: 'GÖNI ÝAÝLYM',
                 chatPlaceholder: 'Jogap bermek üçin giriň...',
                 chatAlert: 'Ilki ýaşyňyzy tassyklaň!',
-                bannedMsg: '🚫 Ulanyjy blokirlendi'
+                bannedMsg: '🚫 Ulanyjy blokirlendi',
+                disclaimer: 'Anketaňyza laýyk hyzmat saýlandy. Gyz saýlamagyň takyklygyny ýokarlandyrmak üçin hasaba alnandan soň goşmaça sorag-jogap gerek bolup biler.'
             },
             // GERMAN
             de: {
@@ -686,7 +695,8 @@
                 chatTitle: 'JETZT LIVE',
                 chatPlaceholder: 'Einloggen...',
                 chatAlert: 'Alter erst bestätigen!',
-                bannedMsg: '🚫 Benutzer blockiert'
+                bannedMsg: '🚫 Benutzer blockiert',
+                disclaimer: 'Ein Service wurde für Ihr Profil ausgewählt. Nach der Registrierung ist möglicherweise eine zusätzliche Umfrage erforderlich, um die Genauigkeit der Übereinstimmung zu verbessern.'
             },
             // FRENCH
             fr: {
@@ -723,7 +733,8 @@
                 chatTitle: 'EN DIRECT',
                 chatPlaceholder: 'Connectez-vous...',
                 chatAlert: 'Vérifiez votre âge!',
-                bannedMsg: '🚫 Utilisateur bloqué'
+                bannedMsg: '🚫 Utilisateur bloqué',
+                disclaimer: 'Un service a été sélectionné pour votre profil. Une enquête supplémentaire peut être requise après l\'inscription pour améliorer la précision de la correspondance.'
             },
             // ITALIAN
             it: {
@@ -760,7 +771,8 @@
                 chatTitle: 'IN DIRETTA',
                 chatPlaceholder: 'Accedi...',
                 chatAlert: 'Verifica età!',
-                bannedMsg: '🚫 Utente bloccato'
+                bannedMsg: '🚫 Utente bloccato',
+                disclaimer: 'Un servizio è stato selezionato per il tuo profilo. Potrebbe essere necessario un sondaggio aggiuntivo dopo la registrazione per migliorare la precisione della corrispondenza.'
             },
             // SPANISH
             es: {
@@ -797,7 +809,8 @@
                 chatTitle: 'EN VIVO',
                 chatPlaceholder: 'Ingresa...',
                 chatAlert: '¡Verifica tu edad!',
-                bannedMsg: '🚫 Usuario bloqueado'
+                bannedMsg: '🚫 Usuario bloqueado',
+                disclaimer: 'Se ha seleccionado un servicio para su perfil. Puede ser necesaria una encuesta adicional después del registro para mejorar la precisión de la coincidencia.'
             },
             // POLISH
             pl: {
@@ -834,7 +847,8 @@
                 chatTitle: 'NA ŻYWO',
                 chatPlaceholder: 'Zaloguj się...',
                 chatAlert: 'Potwierdź wiek!',
-                bannedMsg: '🚫 Użytkownik zablokowany'
+                bannedMsg: '🚫 Użytkownik zablokowany',
+                disclaimer: 'Dla Twojego profilu wybrano usługę. Po rejestracji może być wymagana dodatkowa ankieta w celu poprawy dokładności dopasowania.'
             },
             // DUTCH
             nl: {
@@ -871,7 +885,8 @@
                 chatTitle: 'LIVE NU',
                 chatPlaceholder: 'Inloggen...',
                 chatAlert: 'Bevestig leeftijd!',
-                bannedMsg: '🚫 Gebruiker geblokkeerd'
+                bannedMsg: '🚫 Gebruiker geblokkeerd',
+                disclaimer: 'Er is een service geselecteerd voor uw profiel. Na registratie kan een extra enquête nodig zijn om de nauwkeurigheid van de matching te verbeteren.'
             },
             // SWEDISH
             sv: {
@@ -908,7 +923,8 @@
                 chatTitle: 'LIVE NU',
                 chatPlaceholder: 'Logga in...',
                 chatAlert: 'Bekräfta ålder!',
-                bannedMsg: '🚫 Användare blockerad'
+                bannedMsg: '🚫 Användare blockerad',
+                disclaimer: 'En tjänst har valts för din profil. En ytterligare undersökning kan krävas efter registrering för att förbättra matchningsnoggrannheten.'
             }
         };
 
@@ -948,6 +964,7 @@
             setText('txt-criteria-goal', dict.critGoal);
             setText('txt-criteria-loc', dict.critLoc);
             setText('btn-show', dict.btnShow);
+            setText('txt-disclaimer', dict.disclaimer); // <-- Set disclaimer
             // Chat
             setText('txt-chat-title', dict.chatTitle);
             setText('txt-chat-placeholder', dict.chatPlaceholder);
