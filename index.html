@@ -11,13 +11,12 @@
         body {
             font-family: 'Montserrat', sans-serif;
             background-color: #000;
-            position: fixed; /* Фиксируем body, скролл внутри wrapper */
+            position: fixed;
             inset: 0;
             width: 100%;
             height: 100%;
         }
 
-        /* Убираем синюю подсветку при тапе */
         * { -webkit-tap-highlight-color: transparent; }
 
         /* --- ANIMATIONS --- */
@@ -50,29 +49,42 @@
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8); 
         }
 
-        /* --- UI ELEMENTS --- */
-        .lang-link {
-            position: relative;
-            opacity: 0.7;
-            transition: all 0.2s;
-            cursor: pointer;
-            padding: 4px;
+        /* --- LANGUAGE BAR --- */
+        .lang-btn {
+            opacity: 0.5;
+            transition: all 0.3s ease;
+            filter: grayscale(80%);
+            transform: scale(0.9);
         }
-        .lang-link:hover, .lang-link.active-country {
+        .lang-btn:hover {
+            opacity: 0.8;
+            transform: scale(1.0);
+            filter: grayscale(20%);
+        }
+        .lang-btn.active {
             opacity: 1;
-            color: #ef4444;
-            font-weight: 800;
+            transform: scale(1.1);
+            filter: grayscale(0%);
+            border-bottom: 2px solid #ef4444;
         }
-        .lang-switch-btn {
-            cursor: pointer;
-            transition: all 0.2s ease;
-            opacity: 0.6;
-            font-weight: 600;
-            padding: 4px;
+        /* Скрываем скроллбар, но оставляем прокрутку */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
         }
-        .lang-switch-btn.active { opacity: 1; color: #ef4444; }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
-        /* --- QUIZ SPECIFIC --- */
+        /* --- UI HELPERS --- */
+        button {
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+
         .progress-bar-container {
             background: rgba(255,255,255,0.1);
             border-radius: 99px;
@@ -83,7 +95,6 @@
             transition: width 0.5s ease;
         }
         
-        /* Loading Animation items */
         .processing-item {
             opacity: 0;
             transform: translateX(-20px);
@@ -92,7 +103,6 @@
         .processing-item.active { opacity: 1; transform: translateX(0); }
         .processing-item.done { opacity: 0.5; color: #22c55e; }
 
-        /* --- CHAT CSS --- */
         .chat-scroll-container {
             mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
@@ -141,7 +151,7 @@
 </head>
 <body>
 
-    <!-- VIDEO BACKGROUND (Layer 0) -->
+    <!-- VIDEO BACKGROUND -->
     <div class="fixed inset-0 overflow-hidden z-0 bg-black pointer-events-none">
         <video id="bg-video" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964" class="w-full h-full object-cover">
             <source src="background.mp4" type="video/mp4">
@@ -149,37 +159,57 @@
         <div class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-black/40 z-10"></div>
     </div>
 
-    <!-- HEADER (Layer 50) -->
-    <div class="absolute top-0 left-0 w-full z-50 p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pointer-events-none">
-        <!-- RU/EN -->
-        <div class="flex gap-3 text-sm font-bold tracking-widest pointer-events-auto bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-lg">
-            <span onclick="setLang('ru')" id="lang-ru" class="lang-switch-btn active">RU</span>
-            <span class="text-gray-500">|</span>
-            <span onclick="setLang('en')" id="lang-en" class="lang-switch-btn">EN</span>
-        </div>
-        <!-- Countries -->
-        <div class="flex flex-wrap justify-end gap-x-4 gap-y-2 max-w-[280px] md:max-w-[400px] text-xs font-bold tracking-widest pointer-events-auto bg-black/30 backdrop-blur-md p-3 rounded-xl border border-white/5">
-            <span onclick="setLang('de')" class="lang-link">AT</span>
-            <span onclick="setLang('fr')" class="lang-link">BE</span>
-            <span onclick="setLang('fr')" class="lang-link">FR</span>
-            <span onclick="setLang('de')" class="lang-link">DE</span>
-            <span onclick="setLang('it')" class="lang-link">IT</span>
-            <span onclick="setLang('nl')" class="lang-link">NL</span>
-            <span onclick="setLang('pl')" class="lang-link">PL</span>
-            <span onclick="setLang('es')" class="lang-link">ES</span>
-            <span onclick="setLang('sv')" class="lang-link">SE</span>
-            <span onclick="setLang('de')" class="lang-link">CH</span>
+    <!-- HEADER: UNIFIED LANGUAGE BAR (Layer 50) -->
+    <!-- Горизонтальная панель с флагами -->
+    <div class="absolute top-0 left-0 w-full z-50 p-4 flex justify-center pointer-events-none">
+        <div class="pointer-events-auto bg-black/60 backdrop-blur-md px-2 py-2 rounded-2xl border border-white/10 shadow-2xl max-w-full overflow-hidden">
+            <div id="lang-container" class="flex gap-4 overflow-x-auto hide-scrollbar px-2 items-center">
+                <!-- Кнопки языков генерируются здесь -->
+                <button onclick="setLang('en')" id="lang-btn-en" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇺🇸</span>
+                    <span class="text-[9px] font-bold text-white tracking-wider">EN</span>
+                </button>
+                <button onclick="setLang('ru')" id="lang-btn-ru" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇷🇺</span>
+                    <span class="text-[9px] font-bold text-white tracking-wider">RU</span>
+                </button>
+                <button onclick="setLang('de')" id="lang-btn-de" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇩🇪</span>
+                    <span class="text-[9px] font-bold text-white tracking-wider">DE</span>
+                </button>
+                <button onclick="setLang('fr')" id="lang-btn-fr" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇫🇷</span>
+                    <span class="text-[9px] font-bold text-white tracking-wider">FR</span>
+                </button>
+                <button onclick="setLang('it')" id="lang-btn-it" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇮🇹</span>
+                    <span class="text-[9px] font-bold text-white tracking-wider">IT</span>
+                </button>
+                <button onclick="setLang('es')" id="lang-btn-es" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇪🇸</span>
+                    <span class="text-[9px] font-bold text-white tracking-wider">ES</span>
+                </button>
+                <button onclick="setLang('pl')" id="lang-btn-pl" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇵🇱</span>
+                    <span class="text-[9px] font-bold text-white tracking-wider">PL</span>
+                </button>
+                <button onclick="setLang('nl')" id="lang-btn-nl" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇳🇱</span>
+                    <span class="text-[9px] font-bold text-white tracking-wider">NL</span>
+                </button>
+                <button onclick="setLang('sv')" id="lang-btn-sv" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
+                    <span class="text-xl">🇸🇪</span>
+                    <span class="text-[9px] font-bold text-white tracking-wider">SV</span>
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- MAIN SCROLL WRAPPER (Layer 40) - ГАРАНТИЯ РАБОТЫ НА МОБИЛЬНЫХ -->
+    <!-- MAIN SCROLL WRAPPER -->
     <div class="absolute inset-0 z-40 overflow-y-auto overflow-x-hidden touch-pan-y">
-        
-        <!-- FLEX CONTAINER -->
-        <!-- pt-32 pb-32: большие отступы, чтобы контент не перекрывался браузером -->
-        <div class="min-h-full flex flex-col md:flex-row items-center justify-center pt-32 pb-32 px-4 gap-8 md:gap-16">
+        <div class="min-h-full flex flex-col md:flex-row items-center justify-center pt-36 pb-32 px-4 gap-8 md:gap-16">
             
-            <!-- LEFT COLUMN: DYNAMIC VIEWS -->
+            <!-- LEFT COLUMN -->
             <div id="content-area" class="w-full max-w-sm md:max-w-md flex-shrink-0 relative">
                 
                 <!-- 1. AGE GATE -->
@@ -203,7 +233,7 @@
                     </div>
                 </div>
 
-                <!-- 2. CHOICE (Quiz vs Skip) -->
+                <!-- 2. CHOICE -->
                 <div id="view-choice" class="hidden glass-panel p-6 md:p-8 rounded-2xl text-center border-t-4 border-blue-500 fade-in">
                     <h2 id="txt-choice-title" class="text-xl md:text-2xl font-black mb-2 uppercase text-white">Выберите путь</h2>
                     <p id="txt-choice-sub" class="text-gray-300 text-xs mb-8">Как вы хотите продолжить?</p>
@@ -225,35 +255,29 @@
                     </button>
                 </div>
 
-                <!-- 3. QUIZ (3 Questions) -->
+                <!-- 3. QUIZ -->
                 <div id="view-quiz" class="hidden glass-panel p-6 rounded-2xl border-t-4 border-orange-500 fade-in relative">
                     <div class="w-full h-1.5 progress-bar-container mb-6">
                         <div id="quiz-progress" class="h-full progress-bar-fill" style="width: 33%"></div>
                     </div>
 
                     <div id="quiz-content">
-                        <h3 id="quiz-question" class="text-xl font-bold mb-6 text-center min-h-[4rem] flex items-center justify-center">
-                            <!-- Question Text Here -->
-                        </h3>
-                        <div id="quiz-options" class="flex flex-col gap-3">
-                            <!-- JS Generated Buttons -->
-                        </div>
+                        <h3 id="quiz-question" class="text-xl font-bold mb-6 text-center min-h-[4rem] flex items-center justify-center"></h3>
+                        <div id="quiz-options" class="flex flex-col gap-3"></div>
                     </div>
                 </div>
 
-                <!-- 4. PROCESSING (Animation) -->
+                <!-- 4. PROCESSING -->
                 <div id="view-processing" class="hidden glass-panel p-8 rounded-2xl text-center border-t-4 border-green-500 fade-in">
                     <div class="w-16 h-16 mx-auto mb-6 relative">
                         <div class="absolute inset-0 border-4 border-gray-600 rounded-full opacity-30"></div>
                         <div class="absolute inset-0 border-4 border-t-green-500 rounded-full animate-spin"></div>
                     </div>
-                    <div id="process-log" class="text-left text-xs font-mono text-green-400 bg-black/50 p-4 rounded-lg h-32 flex flex-col justify-end overflow-hidden mb-4 border border-green-900/50">
-                        <!-- JS Logs -->
-                    </div>
+                    <div id="process-log" class="text-left text-xs font-mono text-green-400 bg-black/50 p-4 rounded-lg h-32 flex flex-col justify-end overflow-hidden mb-4 border border-green-900/50"></div>
                     <p id="txt-analyzing" class="text-sm font-bold animate-pulse text-white">Анализ анкет...</p>
                 </div>
 
-                <!-- 5. RESULT (Final) -->
+                <!-- 5. RESULT -->
                 <div id="view-result" class="hidden glass-panel p-6 md:p-8 rounded-2xl text-center border-t-4 border-red-600 fade-in">
                     <div class="mb-6">
                         <div class="inline-block px-4 py-1 rounded-full bg-green-500/20 text-green-400 text-[10px] font-bold border border-green-500/50 mb-4 animate-bounce">
@@ -282,7 +306,7 @@
 
             </div>
 
-            <!-- RIGHT COLUMN: CHAT (Hidden on Mobile) -->
+            <!-- RIGHT COLUMN: CHAT -->
             <div id="live-chat" class="hidden md:flex glass-panel w-80 rounded-2xl fade-in z-10 border-r-4 border-r-green-500/50 flex-shrink-0 h-[500px] flex-col">
                 <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/20 rounded-t-2xl">
                     <div class="flex items-center gap-2">
@@ -308,30 +332,25 @@
     </div>
 
     <script>
-        /* --- CONFIGURATION --- */
         const SMARTLINK_URL = "https://tone.affomelody.com/click?pid=40187&offer_id=25";
         const FALLBACK_URL = "https://t.me/the_serp_real";
 
-        /* --- STATE --- */
-        var currentLang = 'ru';
+        var currentLang = 'en'; // Default to EN initially
         var quizStep = 0;
 
-        /* --- TRANSLATIONS --- */
-        // Renamed 't' to 'translations' to avoid conflicts
+        // --- TRANSLATIONS ---
         const translations = {
             ru: {
                 title: 'Только <span class="text-red-500">Взрослые</span>',
                 subtitle: 'Этот сайт содержит материалы 18+.<br>Вы подтверждаете свой возраст?',
                 btnYes: 'Да, мне есть 18',
                 btnNo: 'Нет, выход',
-                // Choice
                 choiceTitle: 'Выберите путь',
                 choiceSub: 'Как вы хотите продолжить?',
                 rec: 'Рекомендуется',
                 btnChoiceQuiz: 'Подобрать пару',
                 btnChoiceQuizDesc: 'Пройти тест на совместимость (30 сек)',
                 btnChoiceSkip: 'Пропустить и смотреть анкеты',
-                // Quiz
                 q1: 'Ваш возраст?',
                 q1_opt1: '18 - 25 лет',
                 q1_opt2: '25 - 40 лет',
@@ -340,13 +359,11 @@
                 q2_opt1: 'Серьезные отношения',
                 q2_opt2: 'Просто общение',
                 q2_opt3: 'Секс / Развлечения',
-                q3: 'Важен ли внешность?',
+                q3: 'Важна ли внешность?',
                 q3_opt1: 'Да, очень важна',
                 q3_opt2: 'Нет, главное харизма',
-                // Process
                 analyzing: 'Анализ совместимости...',
                 logs: ['Подключение к базе...', 'Фильтрация ботов...', 'Анализ геолокации...', 'Подбор кандидатов...', 'Готово!'],
-                // Result
                 matchFound: 'УСПЕХ! СОВПАДЕНИЕ НАЙДЕНО',
                 ready: 'Анкета Готова',
                 readySub: 'Мы подобрали девушек по вашим параметрам.',
@@ -354,7 +371,6 @@
                 critGoal: 'Цель:',
                 critLoc: 'Локация:',
                 btnShow: 'Показать Партнера',
-                // Chat
                 chatTitle: 'LIVE СЕЙЧАС',
                 chatPlaceholder: 'Войдите, чтобы ответить...',
                 chatAlert: 'Сначала пройдите проверку!'
@@ -396,28 +412,40 @@
             }
         };
 
-        // Fallback languages (copy EN to others)
-        ['de', 'fr', 'it', 'nl', 'pl', 'es', 'sv'].forEach(l => translations[l] = translations.en);
-        // Небольшой перевод для немецкого для примера
-        translations.de = {
-            ...translations.en,
-            title: 'Nur <span class="text-red-500">Erwachsene</span>',
-            btnYes: 'Ja, ich bin 18+',
-            btnNo: 'Nein',
-            choiceTitle: 'Wähle den Weg',
-            btnChoiceQuiz: 'Partner finden',
-            btnChoiceSkip: 'Überspringen'
-        };
+        // Populate other languages with English as fallback base
+        ['de', 'fr', 'it', 'nl', 'pl', 'es', 'sv'].forEach(l => translations[l] = {...translations.en});
+        
+        // Simple manual overrides for key UI elements to make flags feel real
+        // German
+        translations.de.title = 'Nur <span class="text-red-500">Erwachsene</span>';
+        translations.de.subtitle = 'Diese Seite ist ab 18 Jahren.<br>Bestätigen Sie Ihr Alter?';
+        translations.de.btnYes = 'Ja, ich bin 18+';
+        translations.de.btnNo = 'Nein, Raus';
+        translations.de.matchFound = 'TREFFER GEFUNDEN';
+        
+        // French
+        translations.fr.title = 'Adultes <span class="text-red-500">Seulement</span>';
+        translations.fr.subtitle = 'Êtes-vous majeur?';
+        translations.fr.btnYes = 'Oui, j\'ai 18+';
+        translations.fr.btnNo = 'Non, Sortie';
+        
+        // Spanish
+        translations.es.title = 'Solo <span class="text-red-500">Adultos</span>';
+        translations.es.btnYes = 'Sí, tengo 18+';
+        translations.es.btnNo = 'No, Salir';
 
         /* --- LOGIC FLOW --- */
         function setLang(lang) {
             currentLang = lang;
             
-            document.querySelectorAll('.lang-switch-btn').forEach(el => el.classList.remove('active'));
-            const btn = document.getElementById(`lang-${lang === 'ru' ? 'ru' : 'en'}`);
-            if(btn) btn.classList.add('active');
+            // Highlight active button in the new bar
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`lang-btn-${lang}`);
+            if(activeBtn) activeBtn.classList.add('active');
 
-            const dict = translations[lang];
+            const dict = translations[lang] || translations.en;
+            
+            // Helper function
             const setText = (id, text) => {
                 const el = document.getElementById(id);
                 if(el) el.innerHTML = text;
@@ -451,12 +479,43 @@
 
             if(quizStep > 0 && quizStep <= 3) renderQuizStep(quizStep);
             
-            // Restart chat in new language
+            // Restart chat
             document.getElementById('chat-track').innerHTML = ''; 
             startChat();
         }
 
-        // NAVIGATION
+        // --- GEO IP DETECTION ---
+        function autoDetectLanguage() {
+            // Using a free IP API to get country code
+            fetch('https://get.geojs.io/v1/ip/country.json')
+                .then(response => response.json())
+                .then(data => {
+                    const country = data.country ? data.country.toLowerCase() : 'us';
+                    console.log('Detected Country:', country);
+                    
+                    // Map country codes to our supported languages
+                    const langMap = {
+                        'ru': 'ru', 'ua': 'ru', 'by': 'ru', 'kz': 'ru', // Russian speaking
+                        'de': 'de', 'at': 'de', 'ch': 'de', // German speaking
+                        'fr': 'fr', 'be': 'fr', // French
+                        'it': 'it',
+                        'es': 'es', 'mx': 'es', 'ar': 'es', // Spanish
+                        'pl': 'pl',
+                        'nl': 'nl',
+                        'se': 'sv' // Sweden -> Swedish
+                    };
+
+                    // Default to EN if not in map
+                    const detectedLang = langMap[country] || 'en';
+                    setLang(detectedLang);
+                })
+                .catch(err => {
+                    console.error('GeoIP Error:', err);
+                    setLang('en'); // Fallback
+                });
+        }
+
+        // --- NAVIGATION ---
         function gotoChoice() {
             document.getElementById('view-age-gate').classList.add('hidden');
             document.getElementById('view-choice').classList.remove('hidden');
@@ -470,7 +529,7 @@
         }
 
         function renderQuizStep(step) {
-            const dict = translations[currentLang];
+            const dict = translations[currentLang] || translations.en;
             const qEl = document.getElementById('quiz-question');
             const optsEl = document.getElementById('quiz-options');
             const progress = document.getElementById('quiz-progress');
@@ -519,7 +578,7 @@
             document.getElementById('view-processing').classList.remove('hidden');
             
             const logContainer = document.getElementById('process-log');
-            const logs = translations[currentLang].logs;
+            const logs = (translations[currentLang] || translations.en).logs;
             let i = 0;
             const interval = setInterval(() => {
                 if (i >= logs.length) {
@@ -549,7 +608,7 @@
             window.location.href = FALLBACK_URL;
         }
 
-        /* --- CHAT SYSTEM (Women Only Avatars) --- */
+        /* --- CHAT SYSTEM --- */
         const chatNames = ["Alice", "Elena", "Katy", "Masha", "Vika", "Anna"];
         const chatMsgs = {
             ru: ["Привет!", "Кто тут?", "Скучно...", "Ищу парня", "Есть кто 30+?"],
@@ -560,7 +619,6 @@
         function startChat() {
             const track = document.getElementById('chat-track');
             clearTimeout(chatTimeout);
-            // Add initial messages if empty
             if (track.children.length === 0) {
                 for(let i=0; i<3; i++) addMsg(false);
             }
@@ -575,10 +633,10 @@
         }
 
         function addMsg(animate) {
-            const msgs = chatMsgs[currentLang] || chatMsgs.en;
+            const msgs = (chatMsgs[currentLang] || chatMsgs.en);
             const msg = msgs[Math.floor(Math.random() * msgs.length)];
             const name = chatNames[Math.floor(Math.random() * chatNames.length)];
-            const avatarId = Math.floor(Math.random() * 95); // Women only ID
+            const avatarId = Math.floor(Math.random() * 95); 
             const avatarUrl = `https://randomuser.me/api/portraits/women/${avatarId}.jpg`;
             
             const div = document.createElement('div');
@@ -606,7 +664,9 @@
         }
 
         window.onload = function() {
-            setLang('ru');
+            // Start with animation then detect real lang
+            setLang('en'); 
+            autoDetectLanguage();
         }
     </script>
 </body>
