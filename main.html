@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход только 18+</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #000;
+        }
+        
+        /* Анимация появления */
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Пульсация кнопки */
+        .pulse-btn {
+            animation: pulse-red 2s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+        
+        /* Эффекты при наведении */
+        .group:hover ~ .bg-overlay {
+             opacity: 0.2; 
+        }
+
+        /* Стеклянная панель (общий класс) */
+        .glass-panel {
+            background: rgba(0, 0, 0, 0.4); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); 
+        }
+
+        /* Стили для ссылок стран */
+        .lang-link {
+            position: relative;
+            opacity: 0.6;
+            transition: all 0.3s;
+            display: inline-block;
+            cursor: pointer; /* Делаем курсор рукой */
+        }
+        .lang-link:hover, .lang-link.active-country {
+            opacity: 1;
+            color: #ef4444;
+            transform: translateY(-2px);
+            font-weight: 800;
+        }
+
+        /* Стили для переключателя RU/EN */
+        .lang-switch-btn {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            font-weight: 600;
+        }
+        .lang-switch-btn.active {
+            opacity: 1;
+            color: #ef4444;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        .lang-switch-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* Анимация текста */
+        .text-vaporize {
+            opacity: 0;
+            filter: blur(10px);
+            transform: scale(0.95);
+        }
+        .translatable {
+            transition: opacity 0.5s ease, filter 0.5s ease, transform 0.5s ease;
+            will-change: opacity, filter, transform;
+        }
+
+        /* Стили для видео фона */
+        #bg-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        /* --- СТИЛИ ДЛЯ ЧАТА --- */
+        .chat-scroll-container {
+            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+            overflow: hidden;
+            height: 300px;
+        }
+        
+        .chat-track {
+            animation: scrollUp 40s linear infinite;
+        }
+
+        .chat-track:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes scrollUp {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-50%); } 
+        }
+
+        .chat-message {
+            transition: background-color 0.2s;
+        }
+        .chat-message:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Зеленая точка онлайн */
+        .online-dot {
+            box-shadow: 0 0 5px #22c55e;
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Тост-уведомление для чата */
+        .chat-toast {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background-color: rgba(220, 38, 38, 0.95);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 50;
+            width: 90%;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .chat-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .chat-toast::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px 5px 0;
+            border-style: solid;
+            border-color: rgba(220, 38, 38, 0.95) transparent transparent transparent;
+        }
+    </style>
+</head>
+<body class="h-screen w-full overflow-hidden text-white relative">
+
+    <!-- ВИДЕО ФОН -->
+    <div class="bg-image-container absolute inset-0 overflow-hidden z-0">
+        <video id="bg-video" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964">
+            <source src="background.mp4" type="video/mp4">
+            Ваш браузер не поддерживает видео тег.
+        </video>
+    </div>
+
+    <!-- Темный оверлей -->
+    <div class="bg-overlay absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/20 z-0 transition-opacity duration-700"></div>
+
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ ЯЗЫКОВ -->
+    <div class="absolute top-0 left-0 w-full z-50 p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 fade-in-up pointer-events-none">
+        
+        <!-- Переключатель языка RU / EN -->
+        <div class="flex gap-3 text-sm font-bold tracking-widest pointer-events-auto bg-black/30 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none px-3 py-1 rounded-full md:p-0">
+            <span onclick="setLang('ru')" id="lang-ru" class="lang-switch-btn active">RU</span>
+            <span class="text-gray-500">|</span>
+            <span onclick="setLang('en')" id="lang-en" class="lang-switch-btn">EN</span>
+        </div>
+
+        <!-- Панель стран (активные кнопки) -->
+        <div class="flex flex-wrap justify-end gap-x-4 gap-y-2 max-w-[280px] md:max-w-[400px] text-xs font-bold tracking-widest pointer-events-auto bg-black/20 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none p-2 rounded-xl md:p-0" style="animation-delay: 0.2s;">
+            <span onclick="setLang('de')" class="lang-link text-white hover:text-red-500">AT</span>
+            <span onclick="setLang('fr')" class="lang-link text-white hover:text-red-500">BE</span>
+            <span onclick="setLang('fr')" class="lang-link text-white hover:text-red-500">FR</span>
+            <span onclick="setLang('de')" class="lang-link text-white hover:text-red-500">DE</span>
+            <span onclick="setLang('it')" class="lang-link text-white hover:text-red-500">IT</span>
+            <span onclick="setLang('nl')" class="lang-link text-white hover:text-red-500">NL</span>
+            <span onclick="setLang('pl')" class="lang-link text-white hover:text-red-500">PL</span>
+            <span onclick="setLang('es')" class="lang-link text-white hover:text-red-500">ES</span>
+            <span onclick="setLang('sv')" class="lang-link text-white hover:text-red-500">SE</span>
+            <span onclick="setLang('de')" class="lang-link text-white hover:text-red-500">CH</span>
+        </div>
+    </div>
+
+    <!-- ГЛАВНЫЙ КОНТЕЙНЕР -->
+    <div id="main-container" class="relative z-10 flex flex-col md:flex-row items-center justify-end md:justify-center h-full w-full px-4 md:px-20 pb-10 md:pb-0 pt-20 md:pt-0 gap-6 md:gap-12">
+        
+        <!-- ЛЕВАЯ КОЛОНКА: AGE GATE -->
+        <div id="age-gate" class="glass-panel w-full max-w-sm p-6 md:p-8 rounded-2xl text-center border-l-4 border-l-red-600 fade-in-up z-20 order-2 md:order-1 flex-shrink-0">
+            
+            <div class="mb-4 flex justify-center">
+                <div class="w-14 h-14 rounded-full bg-red-600/20 flex items-center justify-center border border-red-500/50 shadow-[0_0_20px_rgba(220,38,38,0.4)]">
+                    <span class="text-lg font-black text-white tracking-tighter">18+</span>
+                </div>
+            </div>
+
+            <h1 class="text-2xl md:text-3xl font-black mb-2 tracking-wide text-white uppercase drop-shadow-lg">
+                <span id="txt-title-prefix" class="translatable">Только</span> 
+                <span id="txt-title-suffix" class="text-red-500 translatable">для взрослых</span>
+            </h1>
+            
+            <p id="txt-subtitle" class="text-gray-200 text-xs mb-6 leading-relaxed font-semibold shadow-black drop-shadow-md translatable">
+                Сайт содержит материалы только для взрослых.<br>Пожалуйста, подтвердите возраст.
+            </p>
+
+            <div class="flex flex-col gap-3 w-full">
+                <button onclick="enterSite()" class="group pulse-btn relative w-full bg-red-600/80 hover:bg-red-600 text-white font-bold py-4 rounded-lg uppercase tracking-wider text-base md:text-lg shadow-lg transform transition-all active:scale-95 flex items-center justify-center overflow-hidden border border-red-400/30">
+                    <span id="txt-btn-yes" class="relative z-10 flex items-center gap-2 translatable">
+                        Да, мне 18+
+                    </span>
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1s_infinite]"></div>
+                </button>
+
+                <button onclick="exitSite()" class="w-full bg-black/40 hover:bg-white/10 border border-gray-500/50 hover:border-white text-gray-300 hover:text-white font-semibold py-3 rounded-lg uppercase tracking-wide text-xs transition-all duration-300">
+                    <span id="txt-btn-no" class="translatable">Нет, мне меньше 18</span>
+                </button>
+            </div>
+
+            <div class="mt-4 text-[10px] text-gray-300 opacity-80">
+                <span id="txt-footer-prefix" class="translatable">Продолжая, вы соглашаетесь с</span> 
+                <a href="#" id="txt-footer-link" class="underline hover:text-red-400 transition-colors translatable">правилами</a>.
+            </div>
+        </div>
+
+        <!-- ПРАВАЯ КОЛОНКА: ЧАТ -->
+        <div id="live-chat" class="hidden md:block glass-panel w-80 rounded-2xl fade-in-up z-10 order-2 border-r-4 border-r-green-500/50 flex-shrink-0" style="animation-delay: 0.3s;">
+            <!-- Шапка чата -->
+            <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/20 rounded-t-2xl">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-green-500 online-dot"></div>
+                    <span id="txt-chat-title" class="text-sm font-bold tracking-wide translatable">LIVE СЕЙЧАС</span>
+                </div>
+                <span class="text-xs text-gray-400 bg-white/10 px-2 py-0.5 rounded-full">4,209 online</span>
+            </div>
+
+            <!-- Список сообщений -->
+            <div class="chat-scroll-container p-2 relative">
+                <div id="chat-track" class="chat-track flex flex-col gap-2">
+                    <!-- Сообщения будут сгенерированы JS -->
+                </div>
+            </div>
+            
+            <!-- Фейковое поле ввода -->
+            <div class="p-3 border-t border-white/10 bg-black/20 rounded-b-2xl relative">
+                <!-- Всплывающее сообщение -->
+                <div id="chat-toast" class="chat-toast">
+                    <span id="txt-chat-alert">Девушки увидят сообщение только после подтверждения возраста!</span>
+                </div>
+
+                <div onclick="tryChat()" class="h-8 bg-white/5 rounded-full border border-white/10 flex items-center px-3 cursor-pointer hover:bg-white/10 transition-colors">
+                    <span id="txt-chat-placeholder" class="text-[10px] text-gray-500 italic translatable">Войдите, чтобы ответить...</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- ДАННЫЕ ДЛЯ ЧАТА (МУЛЬТИЯЗЫЧНЫЕ) ---
+        const chatData = {
+            ru: [
+                { name: "Алиса", msg: "Привет! Кто тут скучает? 😉" },
+                { name: "Elena_Fit", msg: "Ищу парня на вечер..." },
+                { name: "Katy22", msg: "Пришли фото, сладкий)" },
+                { name: "Masha", msg: "Как дела, красавчик?" },
+                { name: "Vika_Love", msg: "Я только из душа... 🔥" },
+                { name: "Анна", msg: "Хочу познакомиться!" },
+                { name: "Olya_Kiss", msg: "Ты здесь? Ответь мне..." },
+                { name: "Kristina", msg: "Мне так одиноко сегодня" },
+                { name: "Svetlana", msg: "Покажешь себя?" },
+                { name: "Nata88", msg: "Привет, милый!" }
+            ],
+            en: [
+                { name: "Alice", msg: "Hey! Who's bored here? 😉" },
+                { name: "Jessica_Fit", msg: "Looking for fun tonight..." },
+                { name: "Katy22", msg: "Send me a pic, honey)" },
+                { name: "Amanda", msg: "How are you doing, handsome?" },
+                { name: "Vicky_Love", msg: "Fresh out of the shower... 🔥" },
+                { name: "Sarah", msg: "Want to chat?" },
+                { name: "Nicole_Kiss", msg: "Are you there? Answer me..." },
+                { name: "Christina", msg: "Feeling lonely tonight" },
+                { name: "Ashley", msg: "Show me yourself?" },
+                { name: "Natalie88", msg: "Hi sweetie!" }
+            ],
+            de: [
+                { name: "Laura", msg: "Hey! Wer langweilt sich? 😉" },
+                { name: "Julia_Fit", msg: "Suche Spaß für heute Abend..." },
+                { name: "Lisa22", msg: "Schick mir ein Foto)" },
+                { name: "Sophie", msg: "Wie geht's, Schöner?" },
+                { name: "Hanna_Love", msg: "Frisch aus der Dusche... 🔥" },
+                { name: "Mia", msg: "Willst du chatten?" },
+                { name: "Lena_Kiss", msg: "Bist du da? Antworte mir..." },
+                { name: "Sarah", msg: "Fühle mich einsam heute" },
+                { name: "Emma", msg: "Zeigst du dich?" },
+                { name: "Lara88", msg: "Hallo Süßer!" }
+            ],
+            fr: [
+                { name: "Chloé", msg: "Salut ! Qui s'ennuie ? 😉" },
+                { name: "Manon_Fit", msg: "Je cherche à m'amuser ce soir..." },
+                { name: "Camille22", msg: "Envoie-moi une photo)" },
+                { name: "Léa", msg: "Comment ça va, beau gosse ?" },
+                { name: "Julie_Love", msg: "Je sors de la douche... 🔥" },
+                { name: "Marie", msg: "Tu veux discuter ?" },
+                { name: "Lucie_Kiss", msg: "Tu es là ? Réponds-moi..." },
+                { name: "Sarah", msg: "Je me sens seule ce soir" },
+                { name: "Anaïs", msg: "Tu te montres ?" },
+                { name: "Clara88", msg: "Salut chéri !" }
+            ],
+            it: [
+                { name: "Sofia", msg: "Ehi! Chi si annoia qui? 😉" },
+                { name: "Giulia_Fit", msg: "Cerco divertimento stasera..." },
+                { name: "Martina22", msg: "Mandami una foto)" },
+                { name: "Chiara", msg: "Come va, bello?" },
+                { name: "Alice_Love", msg: "Appena uscita dalla doccia... 🔥" },
+                { name: "Sara", msg: "Vuoi chattare?" },
+                { name: "Francesca", msg: "Sei lì? Rispondimi..." },
+                { name: "Elena", msg: "Mi sento sola stasera" },
+                { name: "Silvia", msg: "Ti mostri?" },
+                { name: "Anna88", msg: "Ciao dolcezza!" }
+            ],
+            nl: [
+                { name: "Emma", msg: "Hoi! Wie verveelt zich? 😉" },
+                { name: "Sophie_Fit", msg: "Op zoek naar plezier vanavond..." },
+                { name: "Julia22", msg: "Stuur me een foto)" },
+                { name: "Mila", msg: "Hoe gaat het, knappe man?" },
+                { name: "Tess_Love", msg: "Net uit de douche... 🔥" },
+                { name: "Lotte", msg: "Wil je chatten?" },
+                { name: "Zoë_Kiss", msg: "Ben je daar? Antwoord me..." },
+                { name: "Eva", msg: "Voel me eenzaam vanavond" },
+                { name: "Anna", msg: "Laat je jezelf zien?" },
+                { name: "Lisa88", msg: "Hoi schatje!" }
+            ],
+            pl: [
+                { name: "Kasia", msg: "Hej! Kto się nudzi? 😉" },
+                { name: "Ania_Fit", msg: "Szukam zabawy na wieczór..." },
+                { name: "Julia22", msg: "Wyślij mi fotkę)" },
+                { name: "Zuzia", msg: "Jak tam, przystojniaku?" },
+                { name: "Maja_Love", msg: "Właśnie wyszłam spod prysznica... 🔥" },
+                { name: "Ola", msg: "Chcesz popisać?" },
+                { name: "Natalia", msg: "Jesteś tam? Odpowiedz..." },
+                { name: "Wiktoria", msg: "Czuję się samotna" },
+                { name: "Emilia", msg: "Pokażesz się?" },
+                { name: "Karolina", msg: "Hej słodziaku!" }
+            ],
+            es: [
+                { name: "Sofía", msg: "¡Hola! ¿Quién está aburrido? 😉" },
+                { name: "Lucía_Fit", msg: "Busco diversión esta noche..." },
+                { name: "Martina22", msg: "Envíame una foto)" },
+                { name: "María", msg: "¿Cómo estás, guapo?" },
+                { name: "Paula_Love", msg: "Recién salida de la ducha... 🔥" },
+                { name: "Daniela", msg: "¿Quieres chatear?" },
+                { name: "Valeria", msg: "¿Estás ahí? Respóndeme..." },
+                { name: "Julia", msg: "Me siento sola esta noche" },
+                { name: "Alba", msg: "¿Te muestras?" },
+                { name: "Sara88", msg: "¡Hola cariño!" }
+            ],
+            sv: [
+                { name: "Anna", msg: "Hej! Vem har tråkigt? 😉" },
+                { name: "Elsa_Fit", msg: "Söker kul ikväll..." },
+                { name: "Maja22", msg: "Skicka en bild)" },
+                { name: "Alma", msg: "Hur mår du, snygging?" },
+                { name: "Wilma_Love", msg: "Nyduschad... 🔥" },
+                { name: "Klara", msg: "Vill du chatta?" },
+                { name: "Ebba_Kiss", msg: "Är du där? Svara mig..." },
+                { name: "Linnea", msg: "Känner mig ensam ikväll" },
+                { name: "Molly", msg: "Visar du dig?" },
+                { name: "Hanna88", msg: "Hej sötnos!" }
+            ]
+        };
+
+        // Генерация аватарок
+        function getAvatar(index) {
+            const ids = [1, 5, 9, 10, 16, 20, 24, 28, 32, 36, 40, 44]; 
+            const imgId = ids[index % ids.length];
+            return `https://i.pravatar.cc/150?img=${imgId}`;
+        }
+
+        // Функция рендеринга чата
+        function renderChat(lang) {
+            const track = document.getElementById('chat-track');
+            // Если для языка нет чата, используем английский
+            const messages = chatData[lang] || chatData['en'];
+            
+            track.innerHTML = '';
+            
+            const createItems = () => {
+                return messages.map((item, index) => `
+                    <div class="chat-message flex items-center gap-3 p-2 rounded-lg cursor-default">
+                        <div class="relative flex-shrink-0">
+                            <img src="${getAvatar(index)}" class="w-10 h-10 rounded-full object-cover border border-white/20" alt="${item.name}">
+                            <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-black"></div>
+                        </div>
+                        <div class="flex flex-col overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-red-400 truncate">${item.name}</span>
+                                <span class="text-[10px] text-gray-500">now</span>
+                            </div>
+                            <p class="text-xs text-gray-200 truncate">${item.msg}</p>
+                        </div>
+                    </div>
+                `).join('');
+            };
+
+            track.innerHTML = createItems() + createItems() + createItems();
+        }
+
+        // --- ПЕРЕВОДЫ ИНТЕРФЕЙСА ---
+        const translations = {
+            ru: {
+                titlePrefix: "Только",
+                titleSuffix: "для взрослых",
+                subtitle: "Сайт содержит материалы только для взрослых.<br>Пожалуйста, подтвердите возраст.",
+                btnYes: "Да, мне 18+",
+                btnNo: "Нет, мне меньше 18",
+                footerPrefix: "Продолжая, вы соглашаетесь с",
+                footerLink: "правилами",
+                chatTitle: "LIVE СЕЙЧАС",
+                chatPlaceholder: "Войдите, чтобы ответить...",
+                chatAlert: "Девушки увидят сообщение только после подтверждения возраста!"
+            },
+            en: {
+                titlePrefix: "Adults",
+                titleSuffix: "Only",
+                subtitle: "This website contains age-restricted materials.<br>Please confirm your age.",
+                btnYes: "Yes, I am 18+",
+                btnNo: "No, I am under 18",
+                footerPrefix: "By continuing, you agree to the",
+                footerLink: "terms",
+                chatTitle: "LIVE NOW",
+                chatPlaceholder: "Login to reply...",
+                chatAlert: "Girls will see your message only after age verification!"
+            },
+            de: {
+                titlePrefix: "Nur für",
+                titleSuffix: "Erwachsene",
+                subtitle: "Diese Website enthält Materialien nur für Erwachsene.<br>Bitte bestätigen Sie Ihr Alter.",
+                btnYes: "Ja, ich bin 18+",
+                btnNo: "Nein, jünger als 18",
+                footerPrefix: "Wenn Sie fortfahren, akzeptieren Sie die",
+                footerLink: "Bedingungen",
+                chatTitle: "LIVE JETZT",
+                chatPlaceholder: "Einloggen zum Antworten...",
+                chatAlert: "Mädchen sehen Ihre Nachricht erst nach der Altersbestätigung!"
+            },
+            fr: {
+                titlePrefix: "Adultes",
+                titleSuffix: "Uniquement",
+                subtitle: "Ce site contient du matériel pour adultes.<br>Veuillez confirmer votre âge.",
+                btnYes: "Oui, j'ai 18+",
+                btnNo: "Non, moins de 18",
+                footerPrefix: "En continuant, vous acceptez les",
+                footerLink: "termes",
+                chatTitle: "EN DIRECT",
+                chatPlaceholder: "Connectez-vous pour répondre...",
+                chatAlert: "Les filles ne verront votre message qu'après vérification de l'âge !"
+            },
+            it: {
+                titlePrefix: "Solo",
+                titleSuffix: "Adulti",
+                subtitle: "Questo sito contiene materiale per adulti.<br>Conferma la tua età.",
+                btnYes: "Sì, ho 18+",
+                btnNo: "No, meno di 18",
+                footerPrefix: "Continuando, accetti i",
+                footerLink: "termini",
+                chatTitle: "IN DIRETTA",
+                chatPlaceholder: "Accedi per rispondere...",
+                chatAlert: "Le ragazze vedranno il tuo messaggio solo dopo la verifica dell'età!"
+            },
+            nl: {
+                titlePrefix: "Alleen",
+                titleSuffix: "Volwassenen",
+                subtitle: "Deze website bevat materiaal voor volwassenen.<br>Bevestig uw leeftijd.",
+                btnYes: "Ja, ik ben 18+",
+                btnNo: "Nee, jonger dan 18",
+                footerPrefix: "Door verder te gaan, gaat u akkoord met de",
+                footerLink: "voorwaarden",
+                chatTitle: "NU LIVE",
+                chatPlaceholder: "Inloggen om te antwoorden...",
+                chatAlert: "Meisjes zien je bericht pas na leeftijdsverificatie!"
+            },
+            pl: {
+                titlePrefix: "Tylko",
+                titleSuffix: "dorośli",
+                subtitle: "Ta strona zawiera treści dla dorosłych.<br>Potwierdź swój wiek.",
+                btnYes: "Tak, mam 18+",
+                btnNo: "Nie, mam mniej niż 18",
+                footerPrefix: "Kontynuując, akceptujesz",
+                footerLink: "regulamin",
+                chatTitle: "NA ŻYWO",
+                chatPlaceholder: "Zaloguj się, aby odpowiedzieć...",
+                chatAlert: "Dziewczyny zobaczą Twoją wiadomość dopiero po weryfikacji wieku!"
+            },
+            es: {
+                titlePrefix: "Solo",
+                titleSuffix: "Adultos",
+                subtitle: "Este sitio contiene material para adultos.<br>Por favor confirma tu edad.",
+                btnYes: "Sí, tengo 18+",
+                btnNo: "No, tengo menos de 18",
+                footerPrefix: "Al continuar, aceptas los",
+                footerLink: "términos",
+                chatTitle: "EN VIVO",
+                chatPlaceholder: "Inicia sesión para responder...",
+                chatAlert: "¡Las chicas verán tu mensaje solo después de la verificación de edad!"
+            },
+            sv: {
+                titlePrefix: "Endast",
+                titleSuffix: "Vuxna",
+                subtitle: "Denna webbplats innehåller material för vuxna.<br>Vänligen bekräfta din ålder.",
+                btnYes: "Ja, jag är 18+",
+                btnNo: "Nej, under 18",
+                footerPrefix: "Genom att fortsätta godkänner du",
+                footerLink: "villkoren",
+                chatTitle: "LIVE NU",
+                chatPlaceholder: "Logga in för att svara...",
+                chatAlert: "Tjejer ser ditt meddelande först efter åldersverifiering!"
+            }
+        };
+
+        let currentLang = 'ru';
+
+        function setLang(lang) {
+            if (currentLang === lang) return;
+            currentLang = lang;
+
+            // Обновляем состояние RU/EN переключателя
+            // Если выбранный язык не RU и не EN, мы просто снимаем выделение с обоих
+            document.getElementById('lang-ru').classList.toggle('active', lang === 'ru');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+
+            const elements = [
+                { id: 'txt-title-prefix', key: 'titlePrefix' },
+                { id: 'txt-title-suffix', key: 'titleSuffix' },
+                { id: 'txt-subtitle', key: 'subtitle', isHTML: true },
+                { id: 'txt-btn-yes', key: 'btnYes' },
+                { id: 'txt-btn-no', key: 'btnNo' },
+                { id: 'txt-footer-prefix', key: 'footerPrefix' },
+                { id: 'txt-footer-link', key: 'footerLink' },
+                { id: 'txt-chat-title', key: 'chatTitle' },
+                { id: 'txt-chat-placeholder', key: 'chatPlaceholder' },
+                { id: 'txt-chat-alert', key: 'chatAlert' }
+            ];
+
+            // Анимация текста
+            elements.forEach(el => {
+                const domEl = document.getElementById(el.id);
+                if(domEl) domEl.classList.add('text-vaporize');
+            });
+            
+            // Анимация смены чата
+            const chatPanel = document.getElementById('chat-track');
+            chatPanel.style.opacity = '0';
+            chatPanel.style.transition = 'opacity 0.5s';
+
+            setTimeout(() => {
+                elements.forEach(el => {
+                    const domEl = document.getElementById(el.id);
+                    if(domEl) {
+                        // Если перевода нет (например, язык редкий), берем английский как фолбек
+                        const dict = translations[lang] || translations['en'];
+                        
+                        if (el.isHTML) {
+                            domEl.innerHTML = dict[el.key];
+                        } else {
+                            domEl.innerText = dict[el.key];
+                        }
+                        domEl.classList.remove('text-vaporize');
+                    }
+                });
+
+                renderChat(lang);
+                chatPanel.style.opacity = '1';
+
+            }, 500);
+        }
+
+        // Логика кнопок
+        function enterSite() {
+            const container = document.getElementById('main-container');
+            
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(10px)';
+            container.style.transition = 'all 0.5s ease';
+            
+            localStorage.setItem('ageVerified', 'true');
+
+            setTimeout(() => {
+                window.location.href = "https://tone.affomelody.com/click?pid=40187&offer_id=25";
+            }, 500);
+        }
+
+        function exitSite() {
+            window.location.href = "https://t.me/the_serp_real";
+        }
+
+        // Функция для показа предупреждения в чате
+        function tryChat() {
+            const toast = document.getElementById('chat-toast');
+            
+            // Сбрасываем анимацию
+            toast.classList.remove('show');
+            void toast.offsetWidth; 
+            
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        renderChat('ru');
+
+    </script>
+</body>
+</html>
