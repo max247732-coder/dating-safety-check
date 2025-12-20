@@ -160,12 +160,24 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
         .chat-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* PRIVACY MODAL */
+        #privacy-modal {
+            transition: opacity 0.3s ease;
+        }
+        #privacy-modal.hidden {
+            pointer-events: none;
+            opacity: 0;
+        }
+        #privacy-modal:not(.hidden) {
+            pointer-events: auto;
+            opacity: 1;
+        }
     </style>
 </head>
 <body onclick="enableMusic()">
 
     <!-- AUDIO PLAYER -->
-    <!-- preload="auto" помогает загрузить музыку заранее -->
     <audio id="bg-music" loop preload="auto">
         <source src="music.mp3" type="audio/mpeg">
     </audio>
@@ -182,68 +194,21 @@
     <div class="absolute top-0 left-0 w-full z-50 p-4 flex justify-center pointer-events-none">
         <div class="pointer-events-auto bg-gray-900/80 backdrop-blur-md px-3 py-2 rounded-2xl border border-white/20 shadow-2xl max-w-full overflow-hidden">
             <div id="lang-container" class="flex gap-5 overflow-x-auto hide-scrollbar px-2 items-center">
-                
-                <!-- English (Tier 1) -->
-                <button onclick="setLang('en')" id="lang-btn-en" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
-                    <span class="text-xl">🇺🇸</span>
-                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">EN</span>
-                </button>
-                
-                <!-- CIS -->
-                <button onclick="setLang('ru')" id="lang-btn-ru" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
-                    <span class="text-xl">🇷🇺</span>
-                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">RU</span>
-                </button>
-                <button onclick="setLang('ua')" id="lang-btn-ua" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
-                    <span class="text-xl">🇺🇦</span>
-                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">UA</span>
-                </button>
-                <button onclick="setLang('kz')" id="lang-btn-kz" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
-                    <span class="text-xl">🇰🇿</span>
-                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">KZ</span>
-                </button>
-                <button onclick="setLang('az')" id="lang-btn-az" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
-                    <span class="text-xl">🇦🇿</span>
-                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">AZ</span>
-                </button>
-                <button onclick="setLang('ro')" id="lang-btn-ro" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
-                    <span class="text-xl">🇲🇩</span>
-                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">MD</span>
-                </button>
-                <button onclick="setLang('tk')" id="lang-btn-tk" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
-                    <span class="text-xl">🇹🇲</span>
-                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">TM</span>
-                </button>
-
-                <!-- Europe -->
-                <button onclick="setLang('de')" id="lang-btn-de" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
-                    <span class="text-xl">🇩🇪</span>
-                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">DE</span>
-                </button>
-                <button onclick="setLang('fr')" id="lang-btn-fr" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
-                    <span class="text-xl">🇫🇷</span>
-                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">FR</span>
-                </button>
-                <button onclick="setLang('it')" id="lang-btn-it" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
-                    <span class="text-xl">🇮🇹</span>
-                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">IT</span>
-                </button>
-                <button onclick="setLang('es')" id="lang-btn-es" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
-                    <span class="text-xl">🇪🇸</span>
-                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">ES</span>
-                </button>
-                <button onclick="setLang('pl')" id="lang-btn-pl" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
-                    <span class="text-xl">🇵🇱</span>
-                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">PL</span>
-                </button>
-                <button onclick="setLang('nl')" id="lang-btn-nl" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
-                    <span class="text-xl">🇳🇱</span>
-                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">NL</span>
-                </button>
-                <button onclick="setLang('sv')" id="lang-btn-sv" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]">
-                    <span class="text-xl">🇸🇪</span>
-                    <span class="text-[10px] font-bold text-white tracking-wider font-heading">SE</span>
-                </button>
+                <!-- Lang buttons -->
+                <button onclick="setLang('en')" id="lang-btn-en" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]"><span class="text-xl">🇺🇸</span><span class="text-[10px] font-bold text-white tracking-wider font-heading">EN</span></button>
+                <button onclick="setLang('ru')" id="lang-btn-ru" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]"><span class="text-xl">🇷🇺</span><span class="text-[10px] font-bold text-white tracking-wider font-heading">RU</span></button>
+                <button onclick="setLang('ua')" id="lang-btn-ua" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]"><span class="text-xl">🇺🇦</span><span class="text-[10px] font-bold text-white tracking-wider font-heading">UA</span></button>
+                <button onclick="setLang('kz')" id="lang-btn-kz" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]"><span class="text-xl">🇰🇿</span><span class="text-[10px] font-bold text-white tracking-wider font-heading">KZ</span></button>
+                <button onclick="setLang('az')" id="lang-btn-az" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]"><span class="text-xl">🇦🇿</span><span class="text-[10px] font-bold text-white tracking-wider font-heading">AZ</span></button>
+                <button onclick="setLang('ro')" id="lang-btn-ro" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]"><span class="text-xl">🇲🇩</span><span class="text-[10px] font-bold text-white tracking-wider font-heading">MD</span></button>
+                <button onclick="setLang('tk')" id="lang-btn-tk" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]"><span class="text-xl">🇹🇲</span><span class="text-[10px] font-bold text-white tracking-wider font-heading">TM</span></button>
+                <button onclick="setLang('de')" id="lang-btn-de" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]"><span class="text-xl">🇩🇪</span><span class="text-[10px] font-bold text-white tracking-wider font-heading">DE</span></button>
+                <button onclick="setLang('fr')" id="lang-btn-fr" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]"><span class="text-xl">🇫🇷</span><span class="text-[10px] font-bold text-white tracking-wider font-heading">FR</span></button>
+                <button onclick="setLang('it')" id="lang-btn-it" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]"><span class="text-xl">🇮🇹</span><span class="text-[10px] font-bold text-white tracking-wider font-heading">IT</span></button>
+                <button onclick="setLang('es')" id="lang-btn-es" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]"><span class="text-xl">🇪🇸</span><span class="text-[10px] font-bold text-white tracking-wider font-heading">ES</span></button>
+                <button onclick="setLang('pl')" id="lang-btn-pl" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]"><span class="text-xl">🇵🇱</span><span class="text-[10px] font-bold text-white tracking-wider font-heading">PL</span></button>
+                <button onclick="setLang('nl')" id="lang-btn-nl" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]"><span class="text-xl">🇳🇱</span><span class="text-[10px] font-bold text-white tracking-wider font-heading">NL</span></button>
+                <button onclick="setLang('sv')" id="lang-btn-sv" class="lang-btn flex flex-col items-center gap-1 min-w-[30px]"><span class="text-xl">🇸🇪</span><span class="text-[10px] font-bold text-white tracking-wider font-heading">SE</span></button>
             </div>
         </div>
     </div>
@@ -273,6 +238,10 @@
                         <button onclick="exitSite()" class="w-full bg-white/5 hover:bg-white/10 border border-gray-500 text-gray-200 hover:text-white font-semibold py-3 rounded-xl uppercase text-xs tracking-wide transition-colors">
                             <span id="btn-no">Нет, выход</span>
                         </button>
+                    </div>
+                    <!-- PRIVACY LINK -->
+                    <div class="mt-6">
+                        <a href="#" onclick="togglePrivacy(); return false;" id="txt-privacy" class="text-[10px] text-gray-400 hover:text-white underline transition-colors">Политика конфиденциальности</a>
                     </div>
                 </div>
 
@@ -345,7 +314,7 @@
                     <button onclick="redirectSmartlink()" class="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-bold py-5 rounded-xl uppercase tracking-wider text-xl shadow-[0_0_25px_rgba(34,197,94,0.5)] pulse-green active:scale-95 transition-transform font-heading">
                         <span id="btn-show">Показать Партнера</span>
                     </button>
-                    <!-- ДОБАВЛЕНО ПРИМЕЧАНИЕ ЗДЕСЬ -->
+                    <!-- Disclaimer -->
                     <p id="txt-disclaimer" class="text-[10px] text-gray-400 mt-3 px-4 leading-tight opacity-70"></p>
                 </div>
 
@@ -376,15 +345,34 @@
         </div>
     </div>
 
+    <!-- PRIVACY POLICY MODAL -->
+    <div id="privacy-modal" class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 hidden backdrop-blur-md">
+        <div class="bg-gray-900 w-full max-w-2xl rounded-2xl border border-white/10 p-6 md:p-8 relative max-h-[80vh] overflow-y-auto">
+            <button onclick="togglePrivacy()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <h2 class="text-2xl font-bold mb-4 text-white font-heading">Privacy Policy</h2>
+            <div class="text-gray-300 text-sm space-y-4 leading-relaxed">
+                <p><strong>1. Introduction</strong><br>Welcome to our website. By accessing this site, you agree to these terms. This site contains adult material.</p>
+                <p><strong>2. Age Restriction</strong><br>You must be at least 18 years of age to access this website. By entering, you certify that you are 18 years or older.</p>
+                <p><strong>3. Data Collection</strong><br>We do not collect personal identifiable information directly. However, third-party analytics and cookies may be used to improve user experience.</p>
+                <p><strong>4. Third-Party Links</strong><br>This site may contain links to third-party websites. We are not responsible for the content or privacy practices of these sites.</p>
+                <p><strong>5. Cookies</strong><br>We use cookies to analyze traffic and optimize site performance.</p>
+                <p class="text-[10px] text-gray-500 mt-8">Last updated: 2024</p>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SMARTLINK_URL = "https://tone.affomelody.com/click?pid=40187&offer_id=25";
         const FALLBACK_URL = "https://t.me/the_serp_real";
 
-        var currentLang = 'en'; // Default to EN initially
+        var currentLang = 'en'; 
         var quizStep = 0;
         var musicPlayed = false;
 
-        // --- MUSIC LOGIC ---
         function enableMusic() {
             if (!musicPlayed) {
                 const audio = document.getElementById('bg-music');
@@ -434,7 +422,8 @@
                 chatPlaceholder: 'Login to reply...',
                 chatAlert: 'Verify age first!',
                 bannedMsg: '🚫 User blocked by Administrator',
-                disclaimer: 'A service has been selected for your profile. Additional survey may be required after registration to improve matching accuracy.'
+                disclaimer: 'A service has been selected for your profile. Additional survey may be required after registration to improve matching accuracy.',
+                privacy: 'Privacy Policy'
             },
             ru: {
                 title: 'Только <span class="text-red-500">Взрослые</span>',
@@ -471,7 +460,8 @@
                 chatPlaceholder: 'Войдите, чтобы ответить...',
                 chatAlert: 'Сначала пройдите проверку!',
                 bannedMsg: '🚫 Пользователь заблокирован администратором',
-                disclaimer: 'Под вашу анкету подобран сервис. Возможно дополнительное анкетирование после регистрации для повышения точности подбора девушки.'
+                disclaimer: 'Под вашу анкету подобран сервис. Возможно дополнительное анкетирование после регистрации для повышения точности подбора девушки.',
+                privacy: 'Политика конфиденциальности'
             },
             // UKRAINIAN
             ua: {
@@ -509,7 +499,8 @@
                 chatPlaceholder: 'Увійдіть, щоб відповісти...',
                 chatAlert: 'Спочатку пройдіть перевірку!',
                 bannedMsg: '🚫 Користувач заблокований адміністратором',
-                disclaimer: 'Під вашу анкету підібрано сервіс. Можливе додаткове анкетування після реєстрації для підвищення точності підбору дівчини.'
+                disclaimer: 'Під вашу анкету підібрано сервіс. Можливе додаткове анкетування після реєстрації для підвищення точності підбору дівчини.',
+                privacy: 'Політика конфіденційності'
             },
             // KAZAKH
             kz: {
@@ -547,7 +538,8 @@
                 chatPlaceholder: 'Жауап беру үшін кіріңіз...',
                 chatAlert: 'Алдымен жасыңызды растаңыз!',
                 bannedMsg: '🚫 Пайдаланушы бұғатталды',
-                disclaimer: 'Сіздің сауалнамаңызға сәйкес қызмет таңдалды. Қызды дәл таңдау үшін тіркелгеннен кейін қосымша сауалнама қажет болуы мүмкін.'
+                disclaimer: 'Сіздің сауалнамаңызға сәйкес қызмет таңдалды. Қызды дәл таңдау үшін тіркелгеннен кейін қосымша сауалнама қажет болуы мүмкін.',
+                privacy: 'Құпиялылық саясаты'
             },
             // AZERBAIJANI
             az: {
@@ -585,7 +577,8 @@
                 chatPlaceholder: 'Cavab vermək üçün daxil olun...',
                 chatAlert: 'Əvvəlcə yaşınızı təsdiqləyin!',
                 bannedMsg: '🚫 İstifadəçi bloklandı',
-                disclaimer: 'Anketinizə uyğun xidmət seçilib. Qız seçiminin dəqiqliyini artırmaq üçün qeydiyyatdan sonra əlavə sorğu tələb oluna bilər.'
+                disclaimer: 'Anketinizə uyğun xidmət seçilib. Qız seçiminin dəqiqliyini artırmaq üçün qeydiyyatdan sonra əlavə sorğu tələb oluna bilər.',
+                privacy: 'Məxfilik siyasəti'
             },
             // ROMANIAN (Moldova)
             ro: {
@@ -623,7 +616,8 @@
                 chatPlaceholder: 'Logare pentru a răspunde...',
                 chatAlert: 'Verifică vârsta mai întâi!',
                 bannedMsg: '🚫 Utilizator blocat',
-                disclaimer: 'Un serviciu a fost selectat pentru profilul tău. Poate fi necesar un sondaj suplimentar după înregistrare pentru a îmbunătăți precizia potrivirii.'
+                disclaimer: 'Un serviciu a fost selectat pentru profilul tău. Poate fi necesar un sondaj suplimentar după înregistrare pentru a îmbunătăți precizia potrivirii.',
+                privacy: 'Politica de confidențialitate'
             },
             // TURKMEN
             tk: {
@@ -661,7 +655,8 @@
                 chatPlaceholder: 'Jogap bermek üçin giriň...',
                 chatAlert: 'Ilki ýaşyňyzy tassyklaň!',
                 bannedMsg: '🚫 Ulanyjy blokirlendi',
-                disclaimer: 'Anketaňyza laýyk hyzmat saýlandy. Gyz saýlamagyň takyklygyny ýokarlandyrmak üçin hasaba alnandan soň goşmaça sorag-jogap gerek bolup biler.'
+                disclaimer: 'Anketaňyza laýyk hyzmat saýlandy. Gyz saýlamagyň takyklygyny ýokarlandyrmak üçin hasaba alnandan soň goşmaça sorag-jogap gerek bolup biler.',
+                privacy: 'Gizlinlik syýasaty'
             },
             // GERMAN
             de: {
@@ -699,7 +694,8 @@
                 chatPlaceholder: 'Einloggen...',
                 chatAlert: 'Alter erst bestätigen!',
                 bannedMsg: '🚫 Benutzer blockiert',
-                disclaimer: 'Ein Service wurde für Ihr Profil ausgewählt. Nach der Registrierung ist möglicherweise eine zusätzliche Umfrage erforderlich, um die Genauigkeit der Übereinstimmung zu verbessern.'
+                disclaimer: 'Ein Service wurde für Ihr Profil ausgewählt. Nach der Registrierung ist möglicherweise eine zusätzliche Umfrage erforderlich, um die Genauigkeit der Übereinstimmung zu verbessern.',
+                privacy: 'Datenschutzrichtlinie'
             },
             // FRENCH
             fr: {
@@ -737,7 +733,8 @@
                 chatPlaceholder: 'Connectez-vous...',
                 chatAlert: 'Vérifiez votre âge!',
                 bannedMsg: '🚫 Utilisateur bloqué',
-                disclaimer: 'Un service a été sélectionné pour votre profil. Une enquête supplémentaire peut être requise après l\'inscription pour améliorer la précision de la correspondance.'
+                disclaimer: 'Un service a été sélectionné pour votre profil. Une enquête supplémentaire peut être requise après l\'inscription pour améliorer la précision de la correspondance.',
+                privacy: 'Politique de confidentialité'
             },
             // ITALIAN
             it: {
@@ -775,7 +772,8 @@
                 chatPlaceholder: 'Accedi...',
                 chatAlert: 'Verifica età!',
                 bannedMsg: '🚫 Utente bloccato',
-                disclaimer: 'Un servizio è stato selezionato per il tuo profilo. Potrebbe essere necessario un sondaggio aggiuntivo dopo la registrazione per migliorare la precisione della corrispondenza.'
+                disclaimer: 'Un servizio è stato selezionato per il tuo profilo. Potrebbe essere necessario un sondaggio aggiuntivo dopo la registrazione per migliorare la precisione della corrispondenza.',
+                privacy: 'Informativa sulla privacy'
             },
             // SPANISH
             es: {
@@ -813,7 +811,8 @@
                 chatPlaceholder: 'Ingresa...',
                 chatAlert: '¡Verifica tu edad!',
                 bannedMsg: '🚫 Usuario bloqueado',
-                disclaimer: 'Se ha seleccionado un servicio para su perfil. Puede ser necesaria una encuesta adicional después del registro para mejorar la precisión de la coincidencia.'
+                disclaimer: 'Se ha seleccionado un servicio para su perfil. Puede ser necesaria una encuesta adicional después del registro para mejorar la precisión de la coincidencia.',
+                privacy: 'Política de privacidad'
             },
             // POLISH
             pl: {
@@ -851,7 +850,8 @@
                 chatPlaceholder: 'Zaloguj się...',
                 chatAlert: 'Potwierdź wiek!',
                 bannedMsg: '🚫 Użytkownik zablokowany',
-                disclaimer: 'Dla Twojego profilu wybrano usługę. Po rejestracji może być wymagana dodatkowa ankieta w celu poprawy dokładności dopasowania.'
+                disclaimer: 'Dla Twojego profilu wybrano usługę. Po rejestracji może być wymagana dodatkowa ankieta w celu poprawy dokładności dopasowania.',
+                privacy: 'Polityka prywatności'
             },
             // DUTCH
             nl: {
@@ -889,7 +889,8 @@
                 chatPlaceholder: 'Inloggen...',
                 chatAlert: 'Bevestig leeftijd!',
                 bannedMsg: '🚫 Gebruiker geblokkeerd',
-                disclaimer: 'Er is een service geselecteerd voor uw profiel. Na registratie kan een extra enquête nodig zijn om de nauwkeurigheid van de matching te verbeteren.'
+                disclaimer: 'Er is een service geselecteerd voor uw profiel. Na registratie kan een extra enquête nodig zijn om de nauwkeurigheid van de matching te verbeteren.',
+                privacy: 'Privacybeleid'
             },
             // SWEDISH
             sv: {
@@ -927,7 +928,8 @@
                 chatPlaceholder: 'Logga in...',
                 chatAlert: 'Bekräfta ålder!',
                 bannedMsg: '🚫 Användare blockerad',
-                disclaimer: 'En tjänst har valts för din profil. En ytterligare undersökning kan krävas efter registrering för att förbättra matchningsnoggrannheten.'
+                disclaimer: 'En tjänst har valts för din profil. En ytterligare undersökning kan krävas efter registrering för att förbättra matchningsnoggrannheten.',
+                privacy: 'Integritetspolicy'
             }
         };
 
@@ -967,11 +969,13 @@
             setText('txt-criteria-goal', dict.critGoal);
             setText('txt-criteria-loc', dict.critLoc);
             setText('btn-show', dict.btnShow);
-            setText('txt-disclaimer', dict.disclaimer); // <-- Set disclaimer
+            setText('txt-disclaimer', dict.disclaimer); 
             // Chat
             setText('txt-chat-title', dict.chatTitle);
             setText('txt-chat-placeholder', dict.chatPlaceholder);
             setText('txt-chat-alert', dict.chatAlert);
+            // Privacy Link
+            setText('txt-privacy', dict.privacy);
 
             if(quizStep > 0 && quizStep <= 3) renderQuizStep(quizStep);
             
@@ -1097,6 +1101,15 @@
             window.location.href = FALLBACK_URL;
         }
 
+        function togglePrivacy() {
+            const modal = document.getElementById('privacy-modal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
         /* --- CHAT SYSTEM (Girls + TROLLS) --- */
         const chatNames = ["Alice", "Elena", "Katy", "Masha", "Vika", "Anna", "Julia", "Svetlana"];
         const chatMsgs = {
@@ -1158,7 +1171,8 @@
                 nameColor = "text-gray-500";
             } else {
                 // Normal Girl
-                const msgs = (chatMsgs[currentLang] || chatMsgs.en);
+                // Fallback to English if chatMsgs for currentLang is missing
+                const msgs = chatMsgs[currentLang] || chatMsgs.en;
                 msg = msgs[Math.floor(Math.random() * msgs.length)];
                 name = chatNames[Math.floor(Math.random() * chatNames.length)];
                 const avatarId = Math.floor(Math.random() * 95); 
